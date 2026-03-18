@@ -37,6 +37,7 @@ export default function ArtikaGS() {
   const [adminMode, setAdminMode] = useState(false);
   const [adminAuth, setAdminAuth] = useState(false);
   const scrollY = useScrollY();
+  const openAdminMode = useCallback(() => setAdminMode(true), []);
 
   // Data state (loaded from storage or defaults)
   const [projects, setProjects] = useState(DEFAULT_PROJECTS);
@@ -57,9 +58,7 @@ export default function ArtikaGS() {
   }, []);
 
   // Secret trigger: type "admin" anywhere
-  useSecretTrigger(
-    useCallback(() => setAdminMode(true), [])
-  );
+  useSecretTrigger(openAdminMode);
 
   const setPage = useCallback((p) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -160,9 +159,9 @@ export default function ArtikaGS() {
     <>
       <style>{getGlobalStyles()}</style>
       <Cursor />
-      <Nav page={page} setPage={setPage} scrollY={scrollY} />
+      <Nav page={page} setPage={setPage} scrollY={scrollY} onSecretAdminTrigger={openAdminMode} />
       <PageWrapper k={page}>{renderPage()}</PageWrapper>
-      <Footer setPage={setPage} site={site} />
+      <Footer setPage={setPage} site={site} onSecretAdminTrigger={openAdminMode} />
     </>
   );
 }

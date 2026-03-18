@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useInView } from "../hooks/useCustomHooks";
 
 // Fade Up animation component
@@ -87,10 +87,11 @@ export const Cursor = () => {
 
 // Navigation bar
 // Navigation bar
-export const Nav = ({ page, setPage, scrollY }) => {
+export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
   const past = scrollY > 50;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const adminPressTimer = useRef(null);
   const links = ["Home","About", "Services",  "Portfolio", "Gallery"];
   
   // Check if screen is mobile
@@ -109,6 +110,18 @@ export const Nav = ({ page, setPage, scrollY }) => {
   const handleLinkClick = (p) => {
     setPage(p);
     setIsMenuOpen(false);
+  };
+
+  const startAdminPress = () => {
+    if (!onSecretAdminTrigger) return;
+    clearTimeout(adminPressTimer.current);
+    adminPressTimer.current = setTimeout(() => {
+      onSecretAdminTrigger();
+    }, 900);
+  };
+
+  const cancelAdminPress = () => {
+    clearTimeout(adminPressTimer.current);
   };
 
   // Prevent body scroll when menu is open on mobile
@@ -133,6 +146,8 @@ export const Nav = ({ page, setPage, scrollY }) => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
+  useEffect(() => () => clearTimeout(adminPressTimer.current), []);
+
   return (
     <nav
       style={{
@@ -155,6 +170,10 @@ export const Nav = ({ page, setPage, scrollY }) => {
       <button
         data-hover
         onClick={() => setPage("Home")}
+        onTouchStart={startAdminPress}
+        onTouchEnd={cancelAdminPress}
+        onTouchCancel={cancelAdminPress}
+        onTouchMove={cancelAdminPress}
         style={{
           fontFamily: "'Cormorant Garamond',serif",
           fontSize: "1.1rem",
@@ -517,69 +536,91 @@ export const Marquee = () => {
 };
 
 // Footer
-export const Footer = ({ setPage, site }) => (
-  <footer
-    style={{
-      background: "#050504",
-      padding: "2.5rem 3rem",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      borderTop: "1px solid rgba(200,169,126,0.06)",
-    }}
-  >
-    <button
-      data-hover
-      onClick={() => setPage("Home")}
+export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
+  const adminPressTimer = useRef(null);
+
+  const startAdminPress = () => {
+    if (!onSecretAdminTrigger) return;
+    clearTimeout(adminPressTimer.current);
+    adminPressTimer.current = setTimeout(() => {
+      onSecretAdminTrigger();
+    }, 900);
+  };
+
+  const cancelAdminPress = () => {
+    clearTimeout(adminPressTimer.current);
+  };
+
+  useEffect(() => () => clearTimeout(adminPressTimer.current), []);
+
+  return (
+    <footer
       style={{
-        fontFamily: "'Cormorant Garamond',serif",
-        fontSize: "0.95rem",
-        letterSpacing: "0.2em",
-        color: "#C8A97E",
-        fontWeight: 600,
-        textTransform: "uppercase",
-        background: "none",
-        border: "none",
-        cursor: "none",
+        background: "#050504",
+        padding: "2.5rem 3rem",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderTop: "1px solid rgba(200,169,126,0.06)",
       }}
     >
-      {site.studioName}
-    </button>
-    <div
-      style={{
-        fontFamily: "'DM Mono',monospace",
-        fontSize: "0.58rem",
-        letterSpacing: "0.15em",
-        color: "rgba(255,255,255,0.18)",
-        textTransform: "uppercase",
-      }}
-    >
-      2024 All rights reserved
-    </div>
-    <div style={{ display: "flex", gap: "2rem" }}>
-      {["Instagram", "Behance", "LinkedIn"].map((s) => (
-        <a
-          key={s}
-          data-hover
-          href="#"
-          style={{
-            fontFamily: "'DM Mono',monospace",
-            fontSize: "0.58rem",
-            letterSpacing: "0.14em",
-            color: "rgba(255,255,255,0.28)",
-            textDecoration: "none",
-            textTransform: "uppercase",
-            transition: "color 0.3s",
-          }}
-          onMouseEnter={(e) => (e.target.style.color = "#C8A97E")}
-          onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.28)")}
-        >
-          {s}
-        </a>
-      ))}
-    </div>
-  </footer>
-);
+      <button
+        data-hover
+        onClick={() => setPage("Home")}
+        onTouchStart={startAdminPress}
+        onTouchEnd={cancelAdminPress}
+        onTouchCancel={cancelAdminPress}
+        onTouchMove={cancelAdminPress}
+        style={{
+          fontFamily: "'Cormorant Garamond',serif",
+          fontSize: "0.95rem",
+          letterSpacing: "0.2em",
+          color: "#C8A97E",
+          fontWeight: 600,
+          textTransform: "uppercase",
+          background: "none",
+          border: "none",
+          cursor: "none",
+        }}
+      >
+        {site.studioName}
+      </button>
+      <div
+        style={{
+          fontFamily: "'DM Mono',monospace",
+          fontSize: "0.58rem",
+          letterSpacing: "0.15em",
+          color: "rgba(255,255,255,0.18)",
+          textTransform: "uppercase",
+        }}
+      >
+        2024 All rights reserved
+      </div>
+      <div style={{ display: "flex", gap: "2rem" }}>
+        {["Instagram", "Behance", "LinkedIn"].map((s) => (
+          <a
+            key={s}
+            data-hover
+            href="#"
+            style={{
+              fontFamily: "'DM Mono',monospace",
+              fontSize: "0.58rem",
+              letterSpacing: "0.14em",
+              color: "rgba(255,255,255,0.28)",
+              textDecoration: "none",
+              textTransform: "uppercase",
+              transition: "color 0.3s",
+            }}
+            onMouseEnter={(e) => (e.target.style.color = "#C8A97E")}
+            onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.28)")}
+          >
+            {s}
+          </a>
+        ))}
+      </div>
+    </footer>
+  );
+};
 
 // Page wrapper with transition animations
 export const PageWrapper = ({ children, k }) => {
