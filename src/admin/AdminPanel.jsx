@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AdminProjects } from "./AdminProjects";
 import { AdminGallery } from "./AdminGallery";
 import { AdminServices } from "./AdminServices";
 import { AdminSite } from "./AdminSite";
-import { Cursor } from "../components/SharedComponents";
 import { saveStore } from "../utils/storage";
 import { STORE_KEY_PROJECTS, STORE_KEY_GALLERY, STORE_KEY_SERVICES, STORE_KEY_SITE } from "../utils/constants";
 
 export const AdminPanel = ({ projects, setProjects, gallery, setGallery, services, setServices, site, setSite, onLogout }) => {
   const [tab, setTab] = useState("dashboard");
   const [toast, setToast] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -22,13 +24,53 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
     showToast(successMsg || "Saved successfully");
   };
 
+  useEffect(() => {
+    const syncViewport = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth <= 1100);
+    };
+
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+    return () => window.removeEventListener("resize", syncViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isTablet) setMenuOpen(false);
+  }, [isTablet]);
+
+  useEffect(() => {
+    if (!(isTablet && menuOpen)) return undefined;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isTablet, menuOpen]);
+
   const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: "◈" },
+    { id: "dashboard", label: "Dashboard", icon: "◆" },
     { id: "projects", label: "Portfolio", icon: "▣" },
     { id: "gallery", label: "Gallery", icon: "◉" },
     { id: "services", label: "Services", icon: "◎" },
     { id: "site", label: "Site Settings", icon: "◇" },
   ];
+
+  const currentTab = tabs.find((item) => item.id === tab);
+  const selectTab = (nextTab) => {
+    setTab(nextTab);
+    if (isTablet) setMenuOpen(false);
+  };
+
+  const responsive = { isMobile, isTablet };
 
   const S = {
     label: {
@@ -50,36 +92,36 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
       fontSize: "0.95rem",
       color: "rgba(245,240,232,0.75)",
       caretColor: "#C8A97E",
-      padding: "0.6rem 0.9rem",
+      padding: isMobile ? "0.78rem 0.9rem" : "0.6rem 0.9rem",
       marginBottom: "1.2rem",
       transition: "border-color 0.3s",
     },
     btn: {
       fontFamily: "'DM Mono',monospace",
       fontSize: "0.62rem",
-      letterSpacing: "0.18em",
-      padding: "0.6rem 1.4rem",
+      letterSpacing: isMobile ? "0.14em" : "0.18em",
+      padding: isMobile ? "0.8rem 1rem" : "0.6rem 1.4rem",
       border: "none",
-      cursor: "none",
+      cursor: isTablet ? "pointer" : "none",
       textTransform: "uppercase",
       transition: "opacity 0.3s",
     },
     card: {
       background: "rgba(255,255,255,0.025)",
       border: "1px solid rgba(200,169,126,0.08)",
-      padding: "1.5rem",
+      padding: isMobile ? "1.1rem" : "1.5rem",
       marginBottom: "1rem",
     },
     h3: {
       fontFamily: "'Cormorant Garamond',serif",
-      fontSize: "1.3rem",
+      fontSize: isMobile ? "1.15rem" : "1.3rem",
       color: "#F5F0E8",
       fontWeight: 400,
       margin: "0 0 1rem",
     },
     sectionTitle: {
       fontFamily: "'Cormorant Garamond',serif",
-      fontSize: "1.8rem",
+      fontSize: isMobile ? "1.55rem" : "1.8rem",
       color: "#F5F0E8",
       fontWeight: 300,
       margin: "0 0 2rem",
@@ -94,17 +136,18 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
         minHeight: "100vh",
         background: "#060604",
         display: "flex",
+        flexDirection: isTablet ? "column" : "row",
         fontFamily: "'DM Mono',monospace",
-        cursor: "none",
+        cursor: isTablet ? "auto" : "none",
+        position: "relative",
       }}
     >
-      {/* Toast */}
       {toast && (
         <div
           style={{
             position: "fixed",
-            top: "1.5rem",
-            right: "1.5rem",
+            top: isMobile ? "1rem" : "1.5rem",
+            right: isMobile ? "1rem" : "1.5rem",
             zIndex: 9999,
             background: toast.type === "success" ? "#C8A97E" : "#c87e7e",
             color: "#080806",
@@ -112,24 +155,102 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
             fontSize: "0.62rem",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
-            padding: "0.8rem 1.5rem",
+            padding: isMobile ? "0.75rem 1rem" : "0.8rem 1.5rem",
             animation: "fadeInDown 0.3s ease",
+            maxWidth: isMobile ? "calc(100vw - 2rem)" : "none",
           }}
         >
           {toast.type === "success" ? "✓" : "✕"} {toast.msg}
         </div>
       )}
 
-      {/* Sidebar */}
+      {isTablet && (
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 30,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            padding: isMobile ? "1rem" : "1.15rem 1.5rem",
+            background: "rgba(4,4,2,0.94)",
+            borderBottom: "1px solid rgba(200,169,126,0.08)",
+            backdropFilter: "blur(18px)",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: "'Cormorant Garamond',serif",
+                fontSize: isMobile ? "1rem" : "1.1rem",
+                letterSpacing: "0.2em",
+                color: "#C8A97E",
+                textTransform: "uppercase",
+              }}
+            >
+              Artika
+            </div>
+            <div
+              style={{
+                fontSize: "0.52rem",
+                letterSpacing: "0.16em",
+                color: "rgba(255,255,255,0.24)",
+                textTransform: "uppercase",
+                marginTop: "0.2rem",
+              }}
+            >
+              {currentTab?.label}
+            </div>
+          </div>
+          <button
+            data-hover
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+            style={{
+              ...S.btn,
+              color: "#F5F0E8",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(200,169,126,0.12)",
+            }}
+          >
+            {menuOpen ? "Close" : "Menu"}
+          </button>
+        </div>
+      )}
+
+      {isTablet && menuOpen && (
+        <div
+          onClick={() => setMenuOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(4px)",
+            zIndex: 25,
+          }}
+        />
+      )}
+
       <aside
         style={{
-          width: "15rem",
+          width: isTablet ? "min(22rem, calc(100vw - 2rem))" : "15rem",
           background: "#040402",
           borderRight: "1px solid rgba(200,169,126,0.06)",
           display: "flex",
           flexDirection: "column",
           padding: "2rem 0",
           flexShrink: 0,
+          position: isTablet ? "fixed" : "relative",
+          top: isTablet ? 0 : "auto",
+          left: isTablet ? 0 : "auto",
+          bottom: isTablet ? 0 : "auto",
+          zIndex: isTablet ? 35 : "auto",
+          transform: isTablet ? (menuOpen ? "translateX(0)" : "translateX(-105%)") : "none",
+          transition: "transform 0.35s cubic-bezier(0.16,1,0.3,1)",
+          boxShadow: isTablet ? "18px 0 40px rgba(0,0,0,0.35)" : "none",
+          overflowY: "auto",
         }}
       >
         <div style={{ padding: "0 1.5rem 2rem", borderBottom: "1px solid rgba(200,169,126,0.06)" }}>
@@ -162,13 +283,13 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
             <button
               key={t.id}
               data-hover
-              onClick={() => setTab(t.id)}
+              onClick={() => selectTab(t.id)}
               style={{
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
                 gap: "0.9rem",
-                padding: "0.75rem 1.5rem",
+                padding: "0.85rem 1.5rem",
                 background: tab === t.id ? "rgba(200,169,126,0.08)" : "transparent",
                 border: "none",
                 borderLeft: tab === t.id ? "2px solid #C8A97E" : "2px solid transparent",
@@ -176,7 +297,7 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
                 fontSize: "0.6rem",
                 letterSpacing: "0.15em",
                 textTransform: "uppercase",
-                cursor: "none",
+                cursor: isTablet ? "pointer" : "none",
                 transition: "all 0.25s",
                 textAlign: "left",
               }}
@@ -205,9 +326,13 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
         </div>
       </aside>
 
-      {/* Main content */}
-      <main style={{ flex: 1, overflow: "auto", padding: "3rem" }}>
-        {/* ── DASHBOARD ── */}
+      <main
+        style={{
+          flex: 1,
+          overflow: "auto",
+          padding: isMobile ? "1rem" : isTablet ? "1.5rem" : "3rem",
+        }}
+      >
         {tab === "dashboard" && (
           <div>
             <div style={{ marginBottom: "2.5rem" }}>
@@ -222,14 +347,22 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
               >
                 Welcome back
               </div>
-              <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2.8rem", color: "#F5F0E8", fontWeight: 300, margin: 0 }}>
+              <h1
+                style={{
+                  fontFamily: "'Cormorant Garamond',serif",
+                  fontSize: isMobile ? "2rem" : isTablet ? "2.35rem" : "2.8rem",
+                  color: "#F5F0E8",
+                  fontWeight: 300,
+                  margin: 0,
+                }}
+              >
                 Studio Dashboard
               </h1>
             </div>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4,1fr)",
+                gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2,1fr)" : "repeat(4,1fr)",
                 gap: "1px",
                 background: "rgba(200,169,126,0.06)",
                 marginBottom: "2.5rem",
@@ -241,12 +374,12 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
                 ["Services", services.length, "◎"],
                 ["Featured", projects.filter((p) => p.featured).length, "★"],
               ].map(([label, count, icon]) => (
-                <div key={label} style={{ background: "#060604", padding: "2rem" }}>
+                <div key={label} style={{ background: "#060604", padding: isMobile ? "1.35rem" : "2rem" }}>
                   <div style={{ fontSize: "1.2rem", marginBottom: "0.5rem", color: "rgba(200,169,126,0.5)" }}>{icon}</div>
                   <div
                     style={{
                       fontFamily: "'Cormorant Garamond',serif",
-                      fontSize: "2.8rem",
+                      fontSize: isMobile ? "2.2rem" : "2.8rem",
                       color: "#C8A97E",
                       fontWeight: 300,
                       lineHeight: 1,
@@ -268,7 +401,7 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isTablet ? "1fr" : "1fr 1fr", gap: "1.5rem" }}>
               <div style={{ ...S.card }}>
                 <div style={{ ...S.h3 }}>Recent Projects</div>
                 {projects.slice(0, 4).map((p) => (
@@ -276,13 +409,14 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
                     key={p.id}
                     style={{
                       display: "flex",
-                      alignItems: "center",
+                      alignItems: isMobile ? "flex-start" : "center",
+                      flexDirection: isMobile ? "column" : "row",
                       gap: "1rem",
-                      padding: "0.6rem 0",
+                      padding: "0.8rem 0",
                       borderBottom: "1px solid rgba(200,169,126,0.05)",
                     }}
                   >
-                    <img src={p.img} style={{ width: "2.5rem", height: "2.5rem", objectFit: "cover", flexShrink: 0 }} />
+                    <img src={p.img} style={{ width: "2.8rem", height: "2.8rem", objectFit: "cover", flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
                         style={{
@@ -331,11 +465,11 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
                   ["Add Gallery Item", "gallery"],
                   ["Edit Services", "services"],
                   ["Update Site Info", "site"],
-                ].map(([label, t]) => (
+                ].map(([label, nextTab]) => (
                   <button
                     key={label}
                     data-hover
-                    onClick={() => setTab(t)}
+                    onClick={() => selectTab(nextTab)}
                     style={{
                       ...S.btn,
                       display: "block",
@@ -357,28 +491,40 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
           </div>
         )}
 
-        {/* ── PROJECTS ── */}
         {tab === "projects" && (
           <AdminProjects
             projects={projects}
             setProjects={(p) => save(STORE_KEY_PROJECTS, p, setProjects, "Projects saved")}
             S={S}
             showToast={showToast}
+            ui={responsive}
           />
         )}
-        {/* ── GALLERY ── */}
         {tab === "gallery" && (
           <AdminGallery
             gallery={gallery}
             setGallery={(g) => save(STORE_KEY_GALLERY, g, setGallery, "Gallery saved")}
             S={S}
             showToast={showToast}
+            ui={responsive}
           />
         )}
-        {/* ── SERVICES ── */}
-        {tab === "services" && <AdminServices services={services} setServices={(s) => save(STORE_KEY_SERVICES, s, setServices, "Services saved")} S={S} />}
-        {/* ── SITE ── */}
-        {tab === "site" && <AdminSite site={site} setSite={(s) => save(STORE_KEY_SITE, s, setSite, "Site settings saved")} S={S} />}
+        {tab === "services" && (
+          <AdminServices
+            services={services}
+            setServices={(s) => save(STORE_KEY_SERVICES, s, setServices, "Services saved")}
+            S={S}
+            ui={responsive}
+          />
+        )}
+        {tab === "site" && (
+          <AdminSite
+            site={site}
+            setSite={(s) => save(STORE_KEY_SITE, s, setSite, "Site settings saved")}
+            S={S}
+            ui={responsive}
+          />
+        )}
       </main>
     </div>
   );

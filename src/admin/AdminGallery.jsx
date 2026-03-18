@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 
-export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
+export const AdminGallery = ({ gallery, setGallery, S, showToast, ui = {} }) => {
+  const { isMobile, isTablet } = ui;
   const blank = {
     id: Date.now(),
     title: "",
@@ -12,6 +14,7 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
   };
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(blank);
+  const [pendingDelete, setPendingDelete] = useState(null);
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const mediums = [
     "Photography",
@@ -47,27 +50,43 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
     cancel();
   };
 
-  const del = (id) => {
-    if (confirm("Remove this artwork?")) setGallery(gallery.filter((g) => g.id !== id));
+  const del = (item) => {
+    setPendingDelete(item);
   };
+
   const toggle = (id) => setGallery(gallery.map((g) => (g.id === id ? { ...g, visible: !g.visible } : g)));
 
   return (
     <div>
+      <AdminConfirmDialog
+        open={!!pendingDelete}
+        title="Delete artwork?"
+        message={
+          pendingDelete
+            ? `This will permanently remove "${pendingDelete.title}" from the gallery collection.`
+            : ""
+        }
+        confirmLabel="Delete Artwork"
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => {
+          setGallery(gallery.filter((g) => g.id !== pendingDelete.id));
+          setPendingDelete(null);
+          showToast("Artwork deleted");
+        }}
+        ui={ui}
+      />
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: isTablet ? "stretch" : "flex-start",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
           marginBottom: "2rem",
         }}
       >
         <h2 style={{ ...S.sectionTitle, margin: 0, border: "none", padding: 0 }}>Gallery Collection</h2>
-        <button
-          data-hover
-          onClick={startNew}
-          style={{ ...S.btn, color: "#080806", background: "#C8A97E" }}
-        >
+        <button data-hover onClick={startNew} style={{ ...S.btn, color: "#080806", background: "#C8A97E", width: isTablet ? "100%" : "auto" }}>
           + Add Artwork
         </button>
       </div>
@@ -77,20 +96,15 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
           style={{
             background: "rgba(200,169,126,0.04)",
             border: "1px solid rgba(200,169,126,0.15)",
-            padding: "2rem",
+            padding: isMobile ? "1rem" : "2rem",
             marginBottom: "2rem",
           }}
         >
           <h3 style={S.h3}>{editing === "new" ? "New Artwork" : "Edit Artwork"}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isTablet ? "1fr" : "1fr 1fr", gap: "1.5rem" }}>
             <div>
               <label style={S.label}>Title *</label>
-              <input
-                value={form.title}
-                onChange={(e) => upd("title", e.target.value)}
-                style={S.input}
-                placeholder="Artwork title"
-              />
+              <input value={form.title} onChange={(e) => upd("title", e.target.value)} style={S.input} placeholder="Artwork title" />
               <label style={S.label}>Medium</label>
               <select
                 value={form.medium}
@@ -112,36 +126,21 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
                 ))}
               </select>
               <label style={S.label}>Year</label>
-              <input
-                value={form.year}
-                onChange={(e) => upd("year", e.target.value)}
-                style={S.input}
-                placeholder="2024"
-              />
+              <input value={form.year} onChange={(e) => upd("year", e.target.value)} style={S.input} placeholder="2024" />
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.2rem" }}>
-                <input
-                  type="checkbox"
-                  checked={form.visible}
-                  onChange={(e) => upd("visible", e.target.checked)}
-                  style={{ width: "1rem", height: "1rem", accentColor: "#C8A97E" }}
-                />
+                <input type="checkbox" checked={form.visible} onChange={(e) => upd("visible", e.target.checked)} style={{ width: "1rem", height: "1rem", accentColor: "#C8A97E" }} />
                 <label style={{ ...S.label, margin: 0 }}>Visible in gallery</label>
               </div>
             </div>
             <div>
               <label style={S.label}>Image URL *</label>
-              <input
-                value={form.img}
-                onChange={(e) => upd("img", e.target.value)}
-                style={S.input}
-                placeholder="https://images.unsplash.com/..."
-              />
+              <input value={form.img} onChange={(e) => upd("img", e.target.value)} style={S.input} placeholder="https://images.unsplash.com/..." />
               {form.img && (
                 <img
                   src={form.img}
                   style={{
                     width: "100%",
-                    height: "9rem",
+                    height: isMobile ? "11rem" : "9rem",
                     objectFit: "cover",
                     marginBottom: "1.2rem",
                     border: "1px solid rgba(200,169,126,0.1)",
@@ -149,23 +148,19 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
                 />
               )}
               <label style={S.label}>Accent Color</label>
-              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: isMobile ? "stretch" : "center", flexDirection: isMobile ? "column" : "row" }}>
                 <input
                   type="color"
                   value={form.color}
                   onChange={(e) => upd("color", e.target.value)}
-                  style={{ width: "2.5rem", height: "2rem", border: "none", background: "none", cursor: "none" }}
+                  style={{ width: isMobile ? "100%" : "2.5rem", height: "2.5rem", border: "none", background: "none", cursor: isTablet ? "pointer" : "none" }}
                 />
-                <input
-                  value={form.color}
-                  onChange={(e) => upd("color", e.target.value)}
-                  style={{ ...S.input, marginBottom: 0, width: "8rem" }}
-                />
+                <input value={form.color} onChange={(e) => upd("color", e.target.value)} style={{ ...S.input, marginBottom: 0, width: isMobile ? "100%" : "8rem" }} />
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
-            <button data-hover onClick={save} style={{ ...S.btn, color: "#080806", background: "#C8A97E" }}>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", flexDirection: isMobile ? "column" : "row" }}>
+            <button data-hover onClick={save} style={{ ...S.btn, color: "#080806", background: "#C8A97E", width: isMobile ? "100%" : "auto" }}>
               Save Artwork
             </button>
             <button
@@ -176,6 +171,7 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
                 color: "rgba(255,255,255,0.4)",
                 background: "transparent",
                 border: "1px solid rgba(255,255,255,0.1)",
+                width: isMobile ? "100%" : "auto",
               }}
             >
               Cancel
@@ -184,7 +180,7 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1px", background: "rgba(200,169,126,0.05)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2,1fr)" : "repeat(3,1fr)", gap: "1px", background: "rgba(200,169,126,0.05)" }}>
         {gallery.map((g) => (
           <div key={g.id} style={{ background: "#060604", position: "relative" }}>
             <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
@@ -224,7 +220,7 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
                 </div>
               )}
             </div>
-            <div style={{ padding: "0.9rem" }}>
+            <div style={{ padding: isMobile ? "1rem" : "0.9rem" }}>
               <div
                 style={{
                   fontFamily: "'Cormorant Garamond',serif",
@@ -249,18 +245,19 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
               >
                 {g.medium}
               </div>
-              <div style={{ display: "flex", gap: "0.4rem" }}>
+              <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
                 <button
                   data-hover
                   onClick={() => toggle(g.id)}
                   style={{
                     ...S.btn,
-                    padding: "0.3rem 0.7rem",
+                    padding: "0.45rem 0.7rem",
                     fontSize: "0.54rem",
                     color: g.visible ? "#C8A97E" : "rgba(255,255,255,0.3)",
                     background: "transparent",
                     border: "1px solid",
                     borderColor: g.visible ? "rgba(200,169,126,0.3)" : "rgba(255,255,255,0.07)",
+                    flex: isMobile ? 1 : "initial",
                   }}
                 >
                   {g.visible ? "Visible" : "Hidden"}
@@ -270,28 +267,30 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast }) => {
                   onClick={() => startEdit(g)}
                   style={{
                     ...S.btn,
-                    padding: "0.3rem 0.7rem",
+                    padding: "0.45rem 0.7rem",
                     fontSize: "0.54rem",
                     color: "rgba(245,240,232,0.45)",
                     background: "transparent",
                     border: "1px solid rgba(255,255,255,0.07)",
+                    flex: isMobile ? 1 : "initial",
                   }}
                 >
                   Edit
                 </button>
                 <button
                   data-hover
-                  onClick={() => del(g.id)}
+                  onClick={() => del(g)}
                   style={{
                     ...S.btn,
-                    padding: "0.3rem 0.7rem",
+                    padding: "0.45rem 0.7rem",
                     fontSize: "0.54rem",
                     color: "#c87e7e",
                     background: "transparent",
                     border: "1px solid rgba(200,126,126,0.15)",
+                    flex: isMobile ? 1 : "initial",
                   }}
                 >
-                  Del
+                  Delete
                 </button>
               </div>
             </div>

@@ -132,4 +132,22 @@ export const getAdminStyles = () => `
     0%,100%{opacity:0.4;}
     50%{opacity:1;}
   }
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+  @media (max-width: 900px){
+    html, body{
+      cursor:auto;
+    }
+
+    a,button,input,select,textarea{
+      cursor:auto;
+    }
+  }
 `;

@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 
-export const AdminServices = ({ services, setServices, S }) => {
+export const AdminServices = ({ services, setServices, S, ui = {} }) => {
+  const { isMobile, isTablet } = ui;
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
+  const [pendingDelete, setPendingDelete] = useState(null);
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 
@@ -20,26 +23,38 @@ export const AdminServices = ({ services, setServices, S }) => {
     else setServices(services.map((s) => (s.id === editing ? form : s)));
     cancel();
   };
-  const del = (id) => {
-    if (confirm("Delete this service?")) setServices(services.filter((s) => s.id !== id));
-  };
+  const del = (item) => setPendingDelete(item);
 
   return (
     <div>
+      <AdminConfirmDialog
+        open={!!pendingDelete}
+        title="Delete service?"
+        message={
+          pendingDelete
+            ? `This will permanently remove "${pendingDelete.name}" from the services list.`
+            : ""
+        }
+        confirmLabel="Delete Service"
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => {
+          setServices(services.filter((s) => s.id !== pendingDelete.id));
+          setPendingDelete(null);
+        }}
+        ui={ui}
+      />
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: isTablet ? "stretch" : "flex-start",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
           marginBottom: "2rem",
         }}
       >
         <h2 style={{ ...S.sectionTitle, margin: 0, border: "none", padding: 0 }}>Services</h2>
-        <button
-          data-hover
-          onClick={startNew}
-          style={{ ...S.btn, color: "#080806", background: "#C8A97E" }}
-        >
+        <button data-hover onClick={startNew} style={{ ...S.btn, color: "#080806", background: "#C8A97E", width: isTablet ? "100%" : "auto" }}>
           + Add Service
         </button>
       </div>
@@ -49,40 +64,30 @@ export const AdminServices = ({ services, setServices, S }) => {
           style={{
             background: "rgba(200,169,126,0.04)",
             border: "1px solid rgba(200,169,126,0.15)",
-            padding: "2rem",
+            padding: isMobile ? "1rem" : "2rem",
             marginBottom: "2rem",
           }}
         >
           <h3 style={S.h3}>{editing === "new" ? "New Service" : "Edit Service"}</h3>
           <label style={S.label}>Roman Numeral</label>
-          <input
-            value={form.num}
-            onChange={(e) => upd("num", e.target.value)}
-            style={{ ...S.input, width: "6rem" }}
-            placeholder="I"
-          />
+          <input value={form.num} onChange={(e) => upd("num", e.target.value)} style={{ ...S.input, width: isMobile ? "100%" : "6rem" }} placeholder="I" />
           <label style={S.label}>Service Name</label>
-          <input
-            value={form.name}
-            onChange={(e) => upd("name", e.target.value)}
-            style={S.input}
-            placeholder="Brand Identity"
-          />
+          <input value={form.name} onChange={(e) => upd("name", e.target.value)} style={S.input} placeholder="Brand Identity" />
           <label style={S.label}>Description</label>
           <textarea
             value={form.desc}
             onChange={(e) => upd("desc", e.target.value)}
-            rows={3}
+            rows={isMobile ? 4 : 3}
             style={{
               ...S.input,
               resize: "vertical",
               fontFamily: "'Playfair Display',serif",
               fontStyle: "italic",
             }}
-            placeholder="Service description…"
+            placeholder="Service description..."
           />
-          <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
-            <button data-hover onClick={save} style={{ ...S.btn, color: "#080806", background: "#C8A97E" }}>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexDirection: isMobile ? "column" : "row" }}>
+            <button data-hover onClick={save} style={{ ...S.btn, color: "#080806", background: "#C8A97E", width: isMobile ? "100%" : "auto" }}>
               Save Service
             </button>
             <button
@@ -93,6 +98,7 @@ export const AdminServices = ({ services, setServices, S }) => {
                 color: "rgba(255,255,255,0.4)",
                 background: "transparent",
                 border: "1px solid rgba(255,255,255,0.1)",
+                width: isMobile ? "100%" : "auto",
               }}
             >
               Cancel
@@ -106,9 +112,10 @@ export const AdminServices = ({ services, setServices, S }) => {
           key={s.id}
           style={{
             display: "flex",
-            alignItems: "flex-start",
-            gap: "1.5rem",
-            padding: "1.2rem",
+            alignItems: isTablet ? "stretch" : "flex-start",
+            flexDirection: isTablet ? "column" : "row",
+            gap: "1rem",
+            padding: isMobile ? "1rem" : "1.2rem",
             background: i % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
             border: "1px solid rgba(200,169,126,0.05)",
             marginBottom: "0.5rem",
@@ -149,29 +156,31 @@ export const AdminServices = ({ services, setServices, S }) => {
               {s.desc}
             </div>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0, width: isMobile ? "100%" : "auto" }}>
             <button
               data-hover
               onClick={() => startEdit(s)}
               style={{
                 ...S.btn,
-                padding: "0.4rem 0.9rem",
+                padding: "0.55rem 0.9rem",
                 color: "rgba(245,240,232,0.5)",
                 background: "transparent",
                 border: "1px solid rgba(255,255,255,0.07)",
+                flex: isMobile ? 1 : "initial",
               }}
             >
               Edit
             </button>
             <button
               data-hover
-              onClick={() => del(s.id)}
+              onClick={() => del(s)}
               style={{
                 ...S.btn,
-                padding: "0.4rem 0.9rem",
+                padding: "0.55rem 0.9rem",
                 color: "#c87e7e",
                 background: "transparent",
                 border: "1px solid rgba(200,126,126,0.15)",
+                flex: isMobile ? 1 : "initial",
               }}
             >
               Delete

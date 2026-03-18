@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FadeUp } from "../components/SharedComponents";
 import { useInView } from "../hooks/useCustomHooks";
 
@@ -6,6 +6,18 @@ export const PageAbout = ({ site }) => {
   const [ref, inView] = useInView(0.1);
   const [hoveredValue, setHoveredValue] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const coreValues = [
     {
@@ -28,11 +40,11 @@ export const PageAbout = ({ site }) => {
   // Since this is a personal site we only display a single profile
   const teamMembers = [
     {
-      name: "Ian M.",
+      name: "Ian Marwa",
       position: "Founder & Designer",
       // random about message for personal tone
-      bio: "I’m a one‑person studio obsessed with clean typography, thoughtful color palettes, and making quiet, lasting work. When I’m not behind the screen you can find me hiking or experimenting with analog collage.",
-      image: "https://via.placeholder.com/150x150/4F46E5/FFFFFF?text=IM",
+      bio: "I'm a one‑person studio obsessed with clean typography, thoughtful color palettes, and making quiet, lasting work. When I'm not behind the screen you can find me hiking or experimenting with analog collage.",
+      image: "src/public/images/IMG_0018.JPG__1_-removebg-preview.png",
       social: { linkedin: "#", twitter: "#" },
     },
   ];
@@ -58,77 +70,198 @@ export const PageAbout = ({ site }) => {
 
   return (
     <div style={{ background: "#080806", minHeight: "100vh", paddingTop: "5rem" }}>
-      {/* Team Section - single member */}
-      <section id="team" style={{ padding: "5rem 0", background: "#0B0A09" }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
-          <FadeUp>
-            <div
-              style={{
-                fontFamily: "'DM Mono',monospace",
-                fontSize: "0.65rem",
-                letterSpacing: "0.3em",
-                color: "#C8A97E",
-                textTransform: "uppercase",
-                marginBottom: "1rem",
-              }}
-            >
-              About Me
-            </div>
-            <h2
-              style={{
-                fontFamily: "'Cormorant Garamond',serif",
-                fontSize: "3rem",
-                fontWeight: 300,
-                color: "#F5F0E8",
-                margin: 0,
-                lineHeight: 1.1,
-              }}
-            >
-              {teamMembers[0].name}
-            </h2>
-          </FadeUp>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "2rem",
-              marginTop: "3rem",
-            }}
-          >
-            <img
-              src={teamMembers[0].image}
-              alt={teamMembers[0].name}
-              style={{
-                width: "160px",
-                height: "160px",
-                borderRadius: "50%",
-                objectFit: "cover",
-                border: "3px solid #C8A97E",
-              }}
-            />
-            <p
-              style={{
-                fontFamily: "'Playfair Display',serif",
-                fontStyle: "italic",
-                fontSize: "1rem",
-                color: "rgba(245,240,232,0.6)",
-                lineHeight: 1.8,
-                maxWidth: "40rem",
-              }}
-            >
-              {teamMembers[0].bio}
-            </p>
-          </div>
-        </div>
-      </section>
+{/* Team Section - single member */}
+<section
+  id="team"
+  style={{
+    background: "white",
+    position: "relative",
+    height: isMobile ? "auto" : "90vh",
+    padding: isMobile ? "4rem 1.5rem" : "0 3rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  }}
+>
+  <div style={{ width: "100%", maxWidth: "1200px", position: "relative" }}>
+    
+    {/* HUGE BACKGROUND NAME */}
+    <h1
+      style={{
+        position: "absolute",
+        top: "40%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        fontSize: isMobile ? "3rem" : "10rem",
+        fontWeight: 700,
+        letterSpacing: "-0.02em",
+        whiteSpace: "nowrap",
+        opacity: 0.08,
+        zIndex: 1,
+        pointerEvents: "none",
+      }}
+    >
+      {teamMembers[0].name}
+    </h1>
 
+    {/* CENTER IMAGE */}
+    <div
+      style={{
+        position: "relative",
+        zIndex: 3,
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <img
+        src={teamMembers[0].image}
+        alt={teamMembers[0].name}
+        style={{
+          width: isMobile ? "240px" : "380px",
+          height: "auto",
+          objectFit: "cover",
+        }}
+      />
+    </div>
+
+    {/* MOBILE OVERLAY - Only appears on small screens */}
+    {isMobile && (
       <div
         style={{
-          padding: "5rem 3rem",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%)",
+          zIndex: 2,
+          borderRadius: "1rem",
+          pointerEvents: "none",
+        }}
+      />
+    )}
+
+    {/* LEFT TEXT */}
+    <div
+      style={{
+        position: isMobile ? "relative" : "absolute",
+        color: isMobile ? "#ffffff" : "#161615",
+        left: 0,
+        top: isMobile ? "auto" : "50%",
+        transform: isMobile ? "none" : "translateY(-50%)",
+        maxWidth: "300px",
+        zIndex: 4,
+        marginTop: isMobile ? "1rem" : "0",
+        padding: isMobile ? "1rem" : "0",
+        backgroundColor: isMobile ? "rgba(0,0,0,0.7)" : "transparent",
+        borderRadius: isMobile ? "0.5rem" : "0",
+        backdropFilter: isMobile ? "blur(5px)" : "none",
+      }}
+    >
+      <FadeUp>
+        <p
+          style={{
+            fontSize: "2rem",
+            letterSpacing: "0.25em",
+            textTransform: "uppercase",
+            marginBottom: "1rem",
+            color: isMobile ? "#C8A97E" : "inherit",
+          }}
+        >
+          About Me
+        </p>
+
+        <p
+          style={{
+            fontSize: "1.25rem",
+            lineHeight: 1.6,
+            opacity: 0.9,
+            color: isMobile ? "#ffffff" : "inherit",
+          }}
+        >
+          Crafting digital experiences that seamlessly blend beauty,
+          usability, and business goals — turning ideas into designs that work.
+        </p>
+
+        <div style={{ 
+          marginTop: "1.2rem", 
+          display: "flex", 
+          gap: "1rem",
+          color: isMobile ? "#C8A97E" : "inherit",
+        }}>
+          <i className="fab fa-linkedin"></i>
+          <i className="fab fa-instagram"></i>
+          <i className="fab fa-dribbble"></i>
+        </div>
+      </FadeUp>
+    </div>
+
+    {/* RIGHT TEXT */}
+    <div
+      style={{
+        position: isMobile ? "relative" : "absolute",
+        color: isMobile ? "#ffffff" : "#141413",
+        right: 0,
+        bottom: isMobile ? "auto" : "15%",
+        maxWidth: "260px",
+        zIndex: 4,
+        textAlign: isMobile ? "left" : "right",
+        marginTop: isMobile ? "1rem" : "0",
+        padding: isMobile ? "1rem" : "0",
+        backgroundColor: isMobile ? "rgba(0,0,0,0.7)" : "transparent",
+        borderRadius: isMobile ? "0.5rem" : "0",
+        backdropFilter: isMobile ? "blur(5px)" : "none",
+      }}
+    >
+      <FadeUp delay={0.2}>
+        <p
+          style={{
+            fontSize: "1.25rem",
+            lineHeight: 1.6,
+            opacity: 0.9,
+            color: isMobile ? "#ffffff" : "inherit",
+          }}
+        >
+          From the first sketch to the final pixel, every detail is designed
+          to engage users, solve problems, and drive results.
+        </p>
+      </FadeUp>
+    </div>
+
+    {/* DECORATIVE LINE (SVG instead of color-based shape) */}
+    <svg
+      viewBox="0 0 1200 300"
+      preserveAspectRatio="none"
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: 0,
+        width: "100%",
+        height: "60%",
+        zIndex: 2,
+        pointerEvents: "none",
+        opacity: isMobile ? 0.05 : 0.15,
+        color: isMobile ? "#ffffff" : "currentColor",
+      }}
+    >
+      <path
+        d="M0,150 C200,50 400,250 600,150 C800,50 1000,250 1200,150"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+      />
+    </svg>
+  </div>
+</section>
+
+      {/* About Studio Section - Responsive Grid */}
+      <div
+        style={{
+          padding: isMobile ? "3rem 1.5rem" : "5rem 3rem",
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "8rem",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? "3rem" : "8rem",
           alignItems: "start",
         }}
       >
@@ -149,7 +282,7 @@ export const PageAbout = ({ site }) => {
             <h1
               style={{
                 fontFamily: "'Cormorant Garamond',serif",
-                fontSize: "clamp(2.5rem,5vw,5rem)",
+                fontSize: "clamp(2rem,6vw,5rem)",
                 fontWeight: 300,
                 color: "#F5F0E8",
                 lineHeight: 0.94,
@@ -164,7 +297,7 @@ export const PageAbout = ({ site }) => {
               style={{
                 fontFamily: "'Playfair Display',serif",
                 fontStyle: "italic",
-                fontSize: "1.02rem",
+                fontSize: isMobile ? "0.95rem" : "1.02rem",
                 color: "rgba(245,240,232,0.48)",
                 lineHeight: 1.88,
                 margin: "0 0 1.8rem",
@@ -176,7 +309,7 @@ export const PageAbout = ({ site }) => {
               style={{
                 fontFamily: "'Playfair Display',serif",
                 fontStyle: "italic",
-                fontSize: "0.95rem",
+                fontSize: isMobile ? "0.9rem" : "0.95rem",
                 color: "rgba(245,240,232,0.28)",
                 lineHeight: 1.88,
                 margin: "0 0 2.5rem",
@@ -196,7 +329,7 @@ export const PageAbout = ({ site }) => {
               style={{
                 fontFamily: "'Playfair Display',serif",
                 fontStyle: "italic",
-                fontSize: "0.88rem",
+                fontSize: isMobile ? "0.85rem" : "0.88rem",
                 color: "rgba(245,240,232,0.22)",
                 lineHeight: 1.88,
               }}
@@ -207,7 +340,12 @@ export const PageAbout = ({ site }) => {
           </FadeUp>
         </div>
         <FadeUp delay={0.1}>
-          <div style={{ position: "relative", paddingBottom: "2.5rem", paddingRight: "2.5rem" }}>
+          <div style={{ 
+            position: "relative", 
+            paddingBottom: isMobile ? "2rem" : "2.5rem", 
+            paddingRight: isMobile ? "2rem" : "2.5rem",
+            maxWidth: isMobile ? "100%" : "none",
+          }}>
             <img
               src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=700&q=85"
               alt="Studio"
@@ -224,14 +362,14 @@ export const PageAbout = ({ site }) => {
                 position: "absolute",
                 bottom: 0,
                 right: 0,
-                padding: "1.8rem 2.2rem",
+                padding: isMobile ? "1.2rem 1.5rem" : "1.8rem 2.2rem",
                 background: "#C8A97E",
               }}
             >
               <div
                 style={{
                   fontFamily: "'Cormorant Garamond',serif",
-                  fontSize: "2.8rem",
+                  fontSize: isMobile ? "2.2rem" : "2.8rem",
                   fontWeight: 300,
                   color: "#080806",
                   lineHeight: 1,
@@ -242,7 +380,7 @@ export const PageAbout = ({ site }) => {
               <div
                 style={{
                   fontFamily: "'DM Mono',monospace",
-                  fontSize: "0.57rem",
+                  fontSize: isMobile ? "0.55rem" : "0.57rem",
                   letterSpacing: "0.15em",
                   color: "rgba(8,8,6,0.55)",
                   textTransform: "uppercase",
@@ -256,11 +394,11 @@ export const PageAbout = ({ site }) => {
         </FadeUp>
       </div>
 
-      {/* Stats Section */}
+      {/* Stats Section - Responsive Grid */}
       <div
         ref={ref}
         style={{
-          padding: "0 3rem 2px",
+          padding: isMobile ? "0 1.5rem 2px" : "0 3rem 2px",
           borderTop: "1px solid rgba(200,169,126,0.06)",
           borderBottom: "1px solid rgba(200,169,126,0.06)",
         }}
@@ -268,7 +406,7 @@ export const PageAbout = ({ site }) => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
+            gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)",
             gap: "1px",
             background: "rgba(200,169,126,0.06)",
           }}
@@ -282,17 +420,18 @@ export const PageAbout = ({ site }) => {
             <div
               key={i}
               style={{
-                padding: "3rem 2.5rem",
+                padding: isMobile ? "2rem 1rem" : "3rem 2.5rem",
                 background: "#080806",
                 opacity: inView ? 1 : 0,
                 transform: inView ? "none" : "translateY(18px)",
                 transition: `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s`,
+                textAlign: "center",
               }}
             >
               <div
                 style={{
                   fontFamily: "'Cormorant Garamond',serif",
-                  fontSize: "3.8rem",
+                  fontSize: isMobile ? "2.5rem" : "3.8rem",
                   fontWeight: 300,
                   color: "#C8A97E",
                   lineHeight: 1,
@@ -304,7 +443,7 @@ export const PageAbout = ({ site }) => {
               <div
                 style={{
                   fontFamily: "'DM Mono',monospace",
-                  fontSize: "0.58rem",
+                  fontSize: isMobile ? "0.55rem" : "0.58rem",
                   letterSpacing: "0.18em",
                   color: "rgba(255,255,255,0.22)",
                   textTransform: "uppercase",
@@ -317,36 +456,64 @@ export const PageAbout = ({ site }) => {
         </div>
       </div>
 
-      {/* Mission Section - Enhanced Design */}
+      {/* Mission Section - Enhanced Design with Responsive Updates */}
       <section
         id="mission"
         style={{
-          padding: "8rem 0",
-          background: "linear-gradient(135deg, #080806 0%, #0f0e0a 50%, #080806 100%)",
+          padding: isMobile ? "4rem 0" : "8rem 0",
+          background: "white",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", top: 0, right: 0, width: "40%", height: "100%", background: "radial-gradient(circle at 100% 0%, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }}></div>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 2rem", position: "relative", zIndex: 1 }}>
+        <div style={{ 
+          position: "absolute", 
+          top: 0, 
+          right: 0, 
+          width: isMobile ? "60%" : "40%", 
+          height: "100%", 
+          background: "radial-gradient(circle at 100% 0%, rgba(200,169,126,0.08) 0%, transparent 70%)", 
+          pointerEvents: "none" 
+        }}></div>
+        
+        <div style={{ 
+          maxWidth: "1280px", 
+          margin: "0 auto", 
+          padding: isMobile ? "0 1.5rem" : "0 2rem", 
+          position: "relative", 
+          zIndex: 1 
+        }}>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "4rem",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+              gap: isMobile ? "3rem" : "4rem",
               alignItems: "center",
             }}
           >
-            <div style={{ position: "relative" }}>
-              <div style={{ position: "absolute", top: "-40px", left: "-40px", width: "200px", height: "200px", background: "radial-gradient(circle, rgba(200,169,126,0.1) 0%, transparent 70%)", borderRadius: "50%" }}></div>
+            {/* Image Column */}
+            <div style={{ 
+              position: "relative",
+              order: isMobile ? "2" : "1"
+            }}>
+              <div style={{ 
+                position: "absolute", 
+                top: isMobile ? "-20px" : "-40px", 
+                left: isMobile ? "-20px" : "-40px", 
+                width: isMobile ? "150px" : "200px", 
+                height: isMobile ? "150px" : "200px", 
+                background: "radial-gradient(circle, rgba(200,169,126,0.1) 0%, transparent 70%)", 
+                borderRadius: "50%" 
+              }}></div>
+              
               <img
                 src="https://png.pngtree.com/thumb_back/fh260/background/20230624/pngtree-blue-bar-graph-3d-icon-against-black-background-image_3664034.jpg"
                 alt="Creative Design Process"
                 style={{
                   width: "100%",
-                  height: "24rem",
+                  height: isMobile ? "16rem" : "24rem",
                   objectFit: "cover",
-                  borderRadius: "2rem",
+                  borderRadius: isMobile ? "1.5rem" : "2rem",
                   transition: "transform 0.5s cubic-bezier(0.16,1,0.3,1)",
                   cursor: "pointer",
                   boxShadow: "0 20px 60px rgba(200,169,126,0.2)",
@@ -354,72 +521,141 @@ export const PageAbout = ({ site }) => {
                 onMouseEnter={(e) => (e.target.style.transform = "translateY(-8px)")}
                 onMouseLeave={(e) => (e.target.style.transform = "translateY(0)")}
               />
-              <div style={{ position: "absolute", bottom: "20px", left: "20px", background: "rgba(8,8,6,0.8)", backdropFilter: "blur(10px)", padding: "1rem 1.5rem", borderRadius: "1rem", border: "1px solid rgba(200,169,126,0.3)" }}>
-                <p style={{ fontFamily: "'DM Mono',monospace", fontSize: "0.7rem", color: "#C8A97E", letterSpacing: "0.15em", margin: 0 }}>Outcome </p>
+              
+              <div style={{ 
+                position: "absolute", 
+                bottom: isMobile ? "10px" : "20px", 
+                left: isMobile ? "10px" : "20px", 
+                background: "rgba(8,8,6,0.8)", 
+                backdropFilter: "blur(10px)", 
+                padding: isMobile ? "0.75rem 1.2rem" : "1rem 1.5rem", 
+                borderRadius: "1rem", 
+                border: "1px solid rgba(200,169,126,0.3)" 
+              }}>
+                <p style={{ 
+                  fontFamily: "'DM Mono',monospace", 
+                  fontSize: isMobile ? "0.65rem" : "0.7rem", 
+                  color: "#C8A97E", 
+                  letterSpacing: "0.15em", 
+                  margin: 0 
+                }}>Outcome</p>
               </div>
             </div>
-            <div>
+
+            {/* Content Column */}
+            <div style={{ 
+              order: isMobile ? "1" : "2",
+              textAlign: isMobile ? "center" : "left"
+            }}>
               <div style={{ marginBottom: "1.5rem" }}>
                 <i
                   className="fas fa-compass"
                   style={{
-                    fontSize: "3.5rem",
+                    fontSize: isMobile ? "2.8rem" : "3.5rem",
                     color: "#C8A97E",
                     opacity: 0.9,
                   }}
                 ></i>
               </div>
-              <div style={{ marginBottom: "1rem", fontFamily: "'DM Mono',monospace", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#C8A97E", textTransform: "uppercase" }}>My Direction</div>
+              
+              <div style={{ 
+                marginBottom: "1rem", 
+                fontFamily: "'DM Mono',monospace", 
+                fontSize: isMobile ? "0.6rem" : "0.65rem", 
+                letterSpacing: "0.3em", 
+                color: "#C8A97E", 
+                textTransform: "uppercase" 
+              }}>
+                My Direction
+              </div>
+              
               <h2
                 style={{
                   fontFamily: "'Cormorant Garamond',serif",
-                  fontSize: "3.5rem",
+                  fontSize: isMobile ? "clamp(2rem,7vw,3rem)" : "3.5rem",
                   fontWeight: 300,
-                  color: "#F5F0E8",
-                  marginBottom: "2rem",
+                  color: "#0c0c0c",
+                  marginBottom: isMobile ? "1.5rem" : "2rem",
                   lineHeight: "1.1",
                 }}
               >
                 Crafting Visual <span style={{ color: "#A855F7" }}>Masterpieces</span>
               </h2>
+              
               <p
                 style={{
                   fontFamily: "'Playfair Display',serif",
                   fontStyle: "italic",
-                  fontSize: "1.05rem",
-                  color: "rgba(245,240,232,0.52)",
-                  lineHeight: "1.8",
+                  fontSize: isMobile ? "0.95rem" : "1.05rem",
+                  color: "rgba(17, 17, 16, 0.52)",
+                  lineHeight: isMobile ? "1.7" : "1.8",
                   marginBottom: "1.5rem",
+                  maxWidth: isMobile ? "100%" : "600px",
+                  marginLeft: isMobile ? "auto" : "0",
+                  marginRight: isMobile ? "auto" : "0",
                 }}
               >
                 At Artika Graphics, my mission is to empower brands through innovative graphic design solutions that transform ideas into stunning visual experiences. We blend creativity with cutting‑edge technology to deliver designs that captivate, communicate, and convert.
               </p>
-              <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
-                <div style={{ width: "3px", background: "linear-gradient(180deg, #C8A97E, transparent)" }}></div>
-                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "0.95rem", color: "rgba(245,240,232,0.38)", fontStyle: "italic" }}>Every project is a collaborative journey toward excellence, where strategy meets artistry.</p>
+              
+              <div style={{ 
+                display: "flex", 
+                gap: "1rem", 
+                marginTop: "2rem",
+                justifyContent: isMobile ? "center" : "flex-start",
+                maxWidth: isMobile ? "100%" : "500px",
+                marginLeft: isMobile ? "auto" : "0",
+                marginRight: isMobile ? "auto" : "0",
+              }}>
+                <div style={{ 
+                  width: "3px", 
+                  background: "linear-gradient(180deg, #C8A97E, transparent)" 
+                }}></div>
+                <p style={{ 
+                  fontFamily: "'Playfair Display',serif", 
+                  fontSize: isMobile ? "0.9rem" : "0.95rem", 
+                  color: "black", 
+                  fontStyle: "italic",
+                  margin: 0,
+                  textAlign: "left"
+                }}>
+                  Every project is a collaborative journey toward excellence, where strategy meets artistry.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Core Values - Staggered Cards */}
+      {/* Core Values - Staggered Cards with Responsive Updates */}
       <section
         id="values"
         style={{
-          padding: "8rem 0",
+          padding: isMobile ? "4rem 0" : "8rem 0",
           background: "#000000",
           position: "relative",
         }}
       >
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "1px", background: "linear-gradient(90deg, transparent, rgba(200,169,126,0.3), transparent)" }}></div>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 2rem" }}>
-          <div style={{ textAlign: "left", marginBottom: "5rem" }}>
-            <div style={{ fontFamily: "'DM Mono',monospace", fontSize: "0.65rem", letterSpacing: "0.3em", color: "#C8A97E", textTransform: "uppercase", marginBottom: "1rem" }}>Foundation</div>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: isMobile ? "0 1.5rem" : "0 2rem" }}>
+          <div style={{ 
+            textAlign: isMobile ? "center" : "left", 
+            marginBottom: isMobile ? "3rem" : "5rem" 
+          }}>
+            <div style={{ 
+              fontFamily: "'DM Mono',monospace", 
+              fontSize: "0.65rem", 
+              letterSpacing: "0.3em", 
+              color: "#C8A97E", 
+              textTransform: "uppercase", 
+              marginBottom: "1rem" 
+            }}>
+              Foundation
+            </div>
             <h2
               style={{
                 fontFamily: "'Cormorant Garamond',serif",
-                fontSize: "3.5rem",
+                fontSize: isMobile ? "2.5rem" : "3.5rem",
                 fontWeight: 300,
                 color: "#F5F0E8",
                 marginBottom: "1rem",
@@ -430,9 +666,11 @@ export const PageAbout = ({ site }) => {
             <p
               style={{
                 fontFamily: "'Playfair Display',serif",
-                fontSize: "1.05rem",
+                fontSize: isMobile ? "0.95rem" : "1.05rem",
                 color: "rgba(245,240,232,0.48)",
                 maxWidth: "50rem",
+                marginLeft: isMobile ? "auto" : "0",
+                marginRight: isMobile ? "auto" : "0",
               }}
             >
               The principles that guide our creative journey and define our commitment to excellence in graphic design.
@@ -441,7 +679,7 @@ export const PageAbout = ({ site }) => {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))",
               gap: "2rem",
               position: "relative",
             }}
@@ -450,13 +688,13 @@ export const PageAbout = ({ site }) => {
               <div
                 key={index}
                 style={{
-                  padding: "2.5rem",
+                  padding: isMobile ? "2rem" : "2.5rem",
                   position: "relative",
                   opacity: hoveredValue === null || hoveredValue === index ? 1 : 0.4,
                   transform: `translateY(${hoveredValue === index ? -16 : 0}px)`,
                   transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
                   cursor: "pointer",
-                  marginTop: `${index * 20}px`,
+                  marginTop: isMobile ? "0" : `${index * 20}px`,
                 }}
                 onMouseEnter={() => setHoveredValue(index)}
                 onMouseLeave={() => setHoveredValue(null)}
@@ -472,11 +710,11 @@ export const PageAbout = ({ site }) => {
                     zIndex: -1,
                   }}
                 ></div>
-                <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ marginBottom: "1.5rem", textAlign: isMobile ? "center" : "left" }}>
                   <i
                     className={value.icon}
                     style={{
-                      fontSize: "2.8rem",
+                      fontSize: isMobile ? "2.5rem" : "2.8rem",
                       color: "#C8A97E",
                       transition: "all 0.3s",
                       opacity: hoveredValue === index ? 1 : 0.7,
@@ -486,10 +724,11 @@ export const PageAbout = ({ site }) => {
                 <h3
                   style={{
                     fontFamily: "'Cormorant Garamond',serif",
-                    fontSize: "1.5rem",
+                    fontSize: isMobile ? "1.4rem" : "1.5rem",
                     fontWeight: 300,
                     color: "#F5F0E8",
                     marginBottom: "0.8rem",
+                    textAlign: isMobile ? "center" : "left",
                   }}
                 >
                   {value.title}
@@ -499,7 +738,8 @@ export const PageAbout = ({ site }) => {
                     fontFamily: "'Playfair Display',serif",
                     color: "rgba(245,240,232,0.48)",
                     lineHeight: "1.7",
-                    fontSize: "0.95rem",
+                    fontSize: isMobile ? "0.9rem" : "0.95rem",
+                    textAlign: isMobile ? "center" : "left",
                   }}
                 >
                   {value.description}
@@ -510,19 +750,19 @@ export const PageAbout = ({ site }) => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" style={{ padding: "6rem 3rem", background: "#080806" }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 2rem" }}>
+      {/* FAQ Section with Responsive Updates */}
+      <section id="faq" style={{ padding: isMobile ? "4rem 1.5rem" : "6rem 3rem", background: "#080806" }}>
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
           <FadeUp>
             <h2
               style={{
                 fontFamily: "'Cormorant Garamond',serif",
-                fontSize: "3rem",
+                fontSize: isMobile ? "2.2rem" : "3rem",
                 fontWeight: 300,
                 color: "#C8A97E",
                 margin: 0,
                 lineHeight: 1.1,
-                textAlign: "left",
+                textAlign: isMobile ? "center" : "left",
               }}
             >
               Frequently Asked Questions
@@ -543,12 +783,13 @@ export const PageAbout = ({ site }) => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: 0,
+                    gap: "1rem",
                   }}
                 >
                   <h3
                     style={{
                       fontFamily: "'Cormorant Garamond',serif",
-                      fontSize: "1.3rem",
+                      fontSize: isMobile ? "1.1rem" : "1.3rem",
                       color: "#F5F0E8",
                       margin: 0,
                       flex: 1,
@@ -563,6 +804,7 @@ export const PageAbout = ({ site }) => {
                       color: "#C8A97E",
                       transition: "transform 0.3s ease",
                       transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
+                      flexShrink: 0,
                     }}
                   ></i>
                 </button>
@@ -576,11 +818,11 @@ export const PageAbout = ({ site }) => {
                   <p
                     style={{
                       fontFamily: "'Playfair Display',serif",
-                      fontSize: "0.9rem",
+                      fontSize: isMobile ? "0.85rem" : "0.9rem",
                       color: "rgba(245,240,232,0.6)",
                       lineHeight: 1.7,
                       marginTop: "1rem",
-                      paddingRight: "2rem",
+                      paddingRight: isMobile ? "0" : "2rem",
                     }}
                   >
                     {f.a}
