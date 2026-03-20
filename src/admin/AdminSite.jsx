@@ -27,7 +27,7 @@ export const AdminSite = ({ site, setSite, S, ui = {} }) => {
               }}
             />
             <label style={S.label}>Established</label>
-            <input value={form.established} onChange={(e) => upd("established", e.target.value)} style={S.input} placeholder="Est. 2026" />
+            <input value={form.established} onChange={(e) => upd("established", e.target.value)} style={S.input} placeholder="Est. 2024" />
           </div>
           <div style={{ ...S.card }}>
             <div style={{ ...S.h3 }}>Contact Info</div>
