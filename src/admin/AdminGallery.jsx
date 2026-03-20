@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
+import { AdminImageField } from "./AdminImageField";
 
 export const AdminGallery = ({ gallery, setGallery, S, showToast, ui = {} }) => {
   const { isMobile, isTablet } = ui;
@@ -42,7 +43,7 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast, ui = {} }) => 
 
   const save = () => {
     if (!form.title || !form.img) {
-      showToast("Title and image URL are required", "error");
+      showToast("Title and image are required", "error");
       return;
     }
     if (editing === "new") setGallery([...gallery, form]);
@@ -133,20 +134,14 @@ export const AdminGallery = ({ gallery, setGallery, S, showToast, ui = {} }) => 
               </div>
             </div>
             <div>
-              <label style={S.label}>Image URL *</label>
-              <input value={form.img} onChange={(e) => upd("img", e.target.value)} style={S.input} placeholder="https://images.unsplash.com/..." />
-              {form.img && (
-                <img
-                  src={form.img}
-                  style={{
-                    width: "100%",
-                    height: isMobile ? "11rem" : "9rem",
-                    objectFit: "cover",
-                    marginBottom: "1.2rem",
-                    border: "1px solid rgba(200,169,126,0.1)",
-                  }}
-                />
-              )}
+              <AdminImageField
+                value={form.img}
+                onChange={(value) => upd("img", value)}
+                label="Artwork Image"
+                S={S}
+                isMobile={isMobile}
+                showToast={showToast}
+              />
               <label style={S.label}>Accent Color</label>
               <div style={{ display: "flex", gap: "0.75rem", alignItems: isMobile ? "stretch" : "center", flexDirection: isMobile ? "column" : "row" }}>
                 <input

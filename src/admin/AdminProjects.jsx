@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
+import { AdminImageField } from "./AdminImageField";
 
 export const AdminProjects = ({ projects, setProjects, S, showToast, ui = {} }) => {
   const { isMobile, isTablet } = ui;
@@ -44,7 +45,7 @@ export const AdminProjects = ({ projects, setProjects, S, showToast, ui = {} }) 
 
   const save = () => {
     if (!form.title || !form.img) {
-      showToast("Title and image URL are required", "error");
+      showToast("Title and image are required", "error");
       return;
     }
     const p = { ...form, tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean) };
@@ -134,20 +135,14 @@ export const AdminProjects = ({ projects, setProjects, S, showToast, ui = {} }) 
               <input value={form.tags} onChange={(e) => upd("tags", e.target.value)} style={S.input} placeholder="Identity, Packaging, Typography" />
             </div>
             <div>
-              <label style={S.label}>Image URL *</label>
-              <input value={form.img} onChange={(e) => upd("img", e.target.value)} style={S.input} placeholder="https://images.unsplash.com/..." />
-              {form.img && (
-                <img
-                  src={form.img}
-                  style={{
-                    width: "100%",
-                    height: isMobile ? "10rem" : "8rem",
-                    objectFit: "cover",
-                    marginBottom: "1.2rem",
-                    border: "1px solid rgba(200,169,126,0.1)",
-                  }}
-                />
-              )}
+              <AdminImageField
+                value={form.img}
+                onChange={(value) => upd("img", value)}
+                label="Project Image"
+                S={S}
+                isMobile={isMobile}
+                showToast={showToast}
+              />
               <label style={S.label}>Accent Color</label>
               <div style={{ display: "flex", gap: "0.75rem", alignItems: isMobile ? "stretch" : "center", flexDirection: isMobile ? "column" : "row", marginBottom: "1.2rem" }}>
                 <input

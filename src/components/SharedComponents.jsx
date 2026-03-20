@@ -1,6 +1,62 @@
 import { useState, useEffect, useRef } from "react";
 import { useInView } from "../hooks/useCustomHooks";
 
+const SECRET_HOLD_MS = 700;
+const SECRET_TAP_THRESHOLD_MS = 450;
+const SECRET_TAP_COUNT = 4;
+
+const useSecretAdminGesture = (onSecretAdminTrigger) => {
+  const pressTimerRef = useRef(null);
+  const tapCountRef = useRef(0);
+  const lastTapRef = useRef(0);
+
+  const clearPressTimer = () => {
+    clearTimeout(pressTimerRef.current);
+    pressTimerRef.current = null;
+  };
+
+  const fireSecretTrigger = () => {
+    if (!onSecretAdminTrigger) return;
+    clearPressTimer();
+    tapCountRef.current = 0;
+    onSecretAdminTrigger();
+  };
+
+  const startSecretPress = () => {
+    if (!onSecretAdminTrigger) return;
+    clearPressTimer();
+    pressTimerRef.current = setTimeout(() => {
+      fireSecretTrigger();
+    }, SECRET_HOLD_MS);
+  };
+
+  const cancelSecretPress = () => {
+    clearPressTimer();
+  };
+
+  const registerSecretTap = () => {
+    if (!onSecretAdminTrigger) return;
+
+    const now = Date.now();
+    tapCountRef.current = now - lastTapRef.current <= SECRET_TAP_THRESHOLD_MS ? tapCountRef.current + 1 : 1;
+    lastTapRef.current = now;
+
+    if (tapCountRef.current >= SECRET_TAP_COUNT) {
+      fireSecretTrigger();
+    }
+  };
+
+  useEffect(() => {
+    return () => clearPressTimer();
+  }, []);
+
+  return {
+    startSecretPress,
+    cancelSecretPress,
+    registerSecretTap,
+  };
+};
+
 // Fade Up animation component
 export const FadeUp = ({ children, delay = 0, style = {} }) => {
   const [ref, v] = useInView();
@@ -91,7 +147,7 @@ export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
   const past = scrollY > 50;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const adminPressTimer = useRef(null);
+  const { startSecretPress, cancelSecretPress, registerSecretTap } = useSecretAdminGesture(onSecretAdminTrigger);
   const links = ["Home","About", "Services",  "Portfolio", "Gallery"];
   
   // Check if screen is mobile
@@ -110,18 +166,6 @@ export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
   const handleLinkClick = (p) => {
     setPage(p);
     setIsMenuOpen(false);
-  };
-
-  const startAdminPress = () => {
-    if (!onSecretAdminTrigger) return;
-    clearTimeout(adminPressTimer.current);
-    adminPressTimer.current = setTimeout(() => {
-      onSecretAdminTrigger();
-    }, 900);
-  };
-
-  const cancelAdminPress = () => {
-    clearTimeout(adminPressTimer.current);
   };
 
   // Prevent body scroll when menu is open on mobile
@@ -146,8 +190,6 @@ export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
-  useEffect(() => () => clearTimeout(adminPressTimer.current), []);
-
   return (
     <nav
       style={{
@@ -170,10 +212,11 @@ export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
       <button
         data-hover
         onClick={() => setPage("Home")}
-        onTouchStart={startAdminPress}
-        onTouchEnd={cancelAdminPress}
-        onTouchCancel={cancelAdminPress}
-        onTouchMove={cancelAdminPress}
+        onPointerDown={startSecretPress}
+        onPointerUp={cancelSecretPress}
+        onPointerCancel={cancelSecretPress}
+        onPointerLeave={cancelSecretPress}
+        onTouchEnd={registerSecretTap}
         style={{
           fontFamily: "'Cormorant Garamond',serif",
           fontSize: "1.1rem",
@@ -537,21 +580,7 @@ export const Marquee = () => {
 
 // Footer
 export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
-  const adminPressTimer = useRef(null);
-
-  const startAdminPress = () => {
-    if (!onSecretAdminTrigger) return;
-    clearTimeout(adminPressTimer.current);
-    adminPressTimer.current = setTimeout(() => {
-      onSecretAdminTrigger();
-    }, 900);
-  };
-
-  const cancelAdminPress = () => {
-    clearTimeout(adminPressTimer.current);
-  };
-
-  useEffect(() => () => clearTimeout(adminPressTimer.current), []);
+  const { startSecretPress, cancelSecretPress, registerSecretTap } = useSecretAdminGesture(onSecretAdminTrigger);
 
   return (
     <footer
@@ -567,10 +596,11 @@ export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
       <button
         data-hover
         onClick={() => setPage("Home")}
-        onTouchStart={startAdminPress}
-        onTouchEnd={cancelAdminPress}
-        onTouchCancel={cancelAdminPress}
-        onTouchMove={cancelAdminPress}
+        onPointerDown={startSecretPress}
+        onPointerUp={cancelSecretPress}
+        onPointerCancel={cancelSecretPress}
+        onPointerLeave={cancelSecretPress}
+        onTouchEnd={registerSecretTap}
         style={{
           fontFamily: "'Cormorant Garamond',serif",
           fontSize: "0.95rem",
