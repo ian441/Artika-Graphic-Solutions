@@ -143,12 +143,17 @@ export const Cursor = () => {
 
 // Navigation bar
 // Navigation bar
-export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
+export const Nav = ({ page, setPage, scrollY, site, onSecretAdminTrigger }) => {
   const past = scrollY > 50;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { startSecretPress, cancelSecretPress, registerSecretTap } = useSecretAdminGesture(onSecretAdminTrigger);
   const links = ["Home","About", "Services",  "Portfolio", "Gallery"];
+  const socialLinks = [
+    { label: "IG", href: site?.socialInstagram },
+    { label: "BE", href: site?.socialBehance },
+    { label: "LI", href: site?.socialLinkedIn },
+  ].filter((item) => item.href);
   
   // Check if screen is mobile
   useEffect(() => {
@@ -495,11 +500,13 @@ export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
               opacity: isMenuOpen ? 1 : 0,
               transition: `all 0.3s ease ${links.length * 0.1 + 0.1}s`,
             }}>
-              {["IG", "BE", "LI"].map((s, i) => (
+              {socialLinks.map((item) => (
                 <a
-                  key={i}
+                  key={item.label}
                   data-hover
-                  href="#"
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
                   style={{
                     fontFamily: "'DM Mono',monospace",
                     fontSize: "0.8rem",
@@ -512,7 +519,7 @@ export const Nav = ({ page, setPage, scrollY, onSecretAdminTrigger }) => {
                   onMouseEnter={(e) => (e.target.style.color = "#C8A97E")}
                   onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.4)")}
                 >
-                  {s}
+                  {item.label}
                 </a>
               ))}
             </div>
@@ -581,6 +588,11 @@ export const Marquee = () => {
 // Footer
 export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
   const { startSecretPress, cancelSecretPress, registerSecretTap } = useSecretAdminGesture(onSecretAdminTrigger);
+  const socialLinks = [
+    { label: "Instagram", href: site?.socialInstagram },
+    { label: "Behance", href: site?.socialBehance },
+    { label: "LinkedIn", href: site?.socialLinkedIn },
+  ].filter((item) => item.href);
 
   return (
     <footer
@@ -627,11 +639,13 @@ export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
         2024 All rights reserved
       </div>
       <div style={{ display: "flex", gap: "2rem" }}>
-        {["Instagram", "Behance", "LinkedIn"].map((s) => (
+        {socialLinks.map((item) => (
           <a
-            key={s}
+            key={item.label}
             data-hover
-            href="#"
+            href={item.href}
+            target="_blank"
+            rel="noreferrer"
             style={{
               fontFamily: "'DM Mono',monospace",
               fontSize: "0.58rem",
@@ -644,7 +658,7 @@ export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
             onMouseEnter={(e) => (e.target.style.color = "#C8A97E")}
             onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.28)")}
           >
-            {s}
+            {item.label}
           </a>
         ))}
       </div>

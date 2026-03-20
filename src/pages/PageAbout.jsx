@@ -1,12 +1,44 @@
 import React, { useState, useEffect } from "react";
 import { FadeUp } from "../components/SharedComponents";
 import { useInView } from "../hooks/useCustomHooks";
+import profileImage from "../public/images/IMG_0018.JPG__1_-removebg-preview.png";
+
+const Icon = ({ name, size = 24, color = "currentColor", style = {} }) => {
+  const icons = {
+    linkedin: (
+      <path d="M6.94 8.5A1.56 1.56 0 1 0 6.94 5.38a1.56 1.56 0 0 0 0 3.12ZM5.6 10.02h2.67v8.38H5.6v-8.38Zm4.34 0h2.56v1.15h.04c.36-.67 1.23-1.37 2.53-1.37 2.7 0 3.2 1.78 3.2 4.1v4.5H15.6v-3.99c0-.95-.02-2.18-1.33-2.18-1.33 0-1.53 1.04-1.53 2.11v4.06H9.94v-8.38ZM12 2.4A9.6 9.6 0 1 0 12 21.6 9.6 9.6 0 0 0 12 2.4Zm0 1.6A8 8 0 1 1 12 20A8 8 0 0 1 12 4Z" />
+    ),
+    instagram: (
+      <path d="M8.2 4h7.6A4.2 4.2 0 0 1 20 8.2v7.6a4.2 4.2 0 0 1-4.2 4.2H8.2A4.2 4.2 0 0 1 4 15.8V8.2A4.2 4.2 0 0 1 8.2 4Zm0 1.6A2.6 2.6 0 0 0 5.6 8.2v7.6a2.6 2.6 0 0 0 2.6 2.6h7.6a2.6 2.6 0 0 0 2.6-2.6V8.2a2.6 2.6 0 0 0-2.6-2.6H8.2Zm8.2 1.2a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 8a4 4 0 1 1 0 8.01A4 4 0 0 1 12 8Zm0 1.6a2.4 2.4 0 1 0 0 4.81 2.4 2.4 0 0 0 0-4.8Z" />
+    ),
+    facebook: (
+      <path d="M13.34 20v-6.25h2.1l.31-2.44h-2.41V9.75c0-.7.2-1.18 1.2-1.18h1.29V6.39c-.22-.03-.99-.1-1.87-.1-1.85 0-3.12 1.13-3.12 3.2v1.82H8.75v2.44h2.09V20A8 8 0 1 1 13.34 20Z" />
+    ),
+    lightbulb: <path d="M12 3.5a5.5 5.5 0 0 0-3.5 9.74c.65.57 1 1.23 1.12 1.96h4.76c.12-.73.47-1.4 1.12-1.96A5.5 5.5 0 0 0 12 3.5Zm-1.7 13.3h3.4v1.1a1.7 1.7 0 1 1-3.4 0v-1.1Z" />,
+    users: <path d="M9.25 11.5a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5Zm5.5-1a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5ZM4.5 17.25A3.75 3.75 0 0 1 8.25 13.5h2a3.75 3.75 0 0 1 3.75 3.75v.75H4.5v-.75Zm10.5.75v-.75c0-.96-.26-1.86-.72-2.63h.47a3.25 3.25 0 0 1 3.25 3.25V18H15Z" />,
+    award: <path d="M12 4.25 14 8.3l4.48.65-3.24 3.16.76 4.46L12 14.47l-4 2.1.76-4.46L5.52 8.95 10 8.3 12 4.25Zm-2.1 12.8h4.2V20l-2.1-1.18L9.9 20v-2.95Z" />,
+    compass: <path d="M12 3.5A8.5 8.5 0 1 0 20.5 12 8.51 8.51 0 0 0 12 3.5Zm2.93 5.57-1.86 4.8-4.8 1.86 1.86-4.8 4.8-1.86ZM12 5.1A6.9 6.9 0 1 1 5.1 12 6.9 6.9 0 0 1 12 5.1Z" />,
+    plus: <path d="M11.2 5h1.6v6.2H19v1.6h-6.2V19h-1.6v-6.2H5v-1.6h6.2V5Z" />,
+    minus: <path d="M5 11.2h14v1.6H5z" />,
+  };
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" style={{ width: size, height: size, display: "block", fill: color, ...style }}>
+      {icons[name]}
+    </svg>
+  );
+};
 
 export const PageAbout = ({ site }) => {
   const [ref, inView] = useInView(0.1);
   const [hoveredValue, setHoveredValue] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const socialLinks = [
+    { name: "linkedin", href: site?.socialLinkedIn, label: "LinkedIn" },
+    { name: "instagram", href: site?.socialInstagram, label: "Instagram" },
+    { name: "facebook", href: site?.socialFacebook, label: "Facebook" },
+  ].filter((item) => item.href);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -44,7 +76,7 @@ export const PageAbout = ({ site }) => {
       position: "Founder & Designer",
       // random about message for personal tone
       bio: "I'm a one‑person studio obsessed with clean typography, thoughtful color palettes, and making quiet, lasting work. When I'm not behind the screen you can find me hiking or experimenting with analog collage.",
-      image: "src/public/images/IMG_0018.JPG__1_-removebg-preview.png",
+      image: profileImage,
       social: { linkedin: "#", twitter: "#" },
     },
   ];
@@ -112,15 +144,18 @@ export const PageAbout = ({ site }) => {
         zIndex: 3,
         display: "flex",
         justifyContent: "center",
+        margin: isMobile ? "0 auto" : "0",
       }}
     >
       <img
         src={teamMembers[0].image}
         alt={teamMembers[0].name}
         style={{
-          width: isMobile ? "240px" : "380px",
+          width: isMobile ? "min(72vw, 240px)" : "380px",
+          maxWidth: "100%",
           height: "auto",
           objectFit: "cover",
+          display: "block",
         }}
       />
     </div>
@@ -190,9 +225,22 @@ export const PageAbout = ({ site }) => {
           gap: "1rem",
           color: isMobile ? "#C8A97E" : "inherit",
         }}>
-          <i className="fab fa-linkedin"></i>
-          <i className="fab fa-instagram"></i>
-          <i className="fab fa-dribbble"></i>
+          {socialLinks.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={item.label}
+              style={{
+                color: "inherit",
+                textDecoration: "none",
+                display: "inline-flex",
+              }}
+            >
+              <Icon name={item.name} size={22} color={isMobile ? "#C8A97E" : "#161615"} />
+            </a>
+          ))}
         </div>
       </FadeUp>
     </div>
@@ -548,14 +596,7 @@ export const PageAbout = ({ site }) => {
               textAlign: isMobile ? "center" : "left"
             }}>
               <div style={{ marginBottom: "1.5rem" }}>
-                <i
-                  className="fas fa-compass"
-                  style={{
-                    fontSize: isMobile ? "2.8rem" : "3.5rem",
-                    color: "#C8A97E",
-                    opacity: 0.9,
-                  }}
-                ></i>
+                <Icon name="compass" size={isMobile ? 44 : 56} color="#C8A97E" style={{ opacity: 0.9 }} />
               </div>
               
               <div style={{ 
@@ -711,15 +752,15 @@ export const PageAbout = ({ site }) => {
                   }}
                 ></div>
                 <div style={{ marginBottom: "1.5rem", textAlign: isMobile ? "center" : "left" }}>
-                  <i
-                    className={value.icon}
+                  <Icon
+                    name={value.icon.replace("fas fa-", "")}
+                    size={isMobile ? 40 : 45}
+                    color="#C8A97E"
                     style={{
-                      fontSize: isMobile ? "2.5rem" : "2.8rem",
-                      color: "#C8A97E",
                       transition: "all 0.3s",
                       opacity: hoveredValue === index ? 1 : 0.7,
                     }}
-                  ></i>
+                  />
                 </div>
                 <h3
                   style={{
@@ -797,16 +838,16 @@ export const PageAbout = ({ site }) => {
                   >
                     {f.q}
                   </h3>
-                  <i
-                    className={`fas ${openFaq === i ? 'fa-minus' : 'fa-plus'}`}
+                  <Icon
+                    name={openFaq === i ? "minus" : "plus"}
+                    size={16}
+                    color="#C8A97E"
                     style={{
-                      fontSize: "1rem",
-                      color: "#C8A97E",
                       transition: "transform 0.3s ease",
                       transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
                       flexShrink: 0,
                     }}
-                  ></i>
+                  />
                 </button>
                 <div
                   style={{

@@ -35,6 +35,14 @@ export const AdminSite = ({ site, setSite, S, ui = {} }) => {
             <input value={form.email} onChange={(e) => upd("email", e.target.value)} style={S.input} />
             <label style={S.label}>Location</label>
             <input value={form.location} onChange={(e) => upd("location", e.target.value)} style={S.input} placeholder="Nairobi, Kenya" />
+            <label style={S.label}>Instagram URL</label>
+            <input value={form.socialInstagram || ""} onChange={(e) => upd("socialInstagram", e.target.value)} style={S.input} placeholder="https://instagram.com/yourhandle" />
+            <label style={S.label}>LinkedIn URL</label>
+            <input value={form.socialLinkedIn || ""} onChange={(e) => upd("socialLinkedIn", e.target.value)} style={S.input} placeholder="https://linkedin.com/in/yourhandle" />
+            <label style={S.label}>Facebook URL</label>
+            <input value={form.socialFacebook || ""} onChange={(e) => upd("socialFacebook", e.target.value)} style={S.input} placeholder="https://facebook.com/yourpage" />
+            <label style={S.label}>Behance URL</label>
+            <input value={form.socialBehance || ""} onChange={(e) => upd("socialBehance", e.target.value)} style={S.input} placeholder="https://behance.net/yourhandle" />
           </div>
         </div>
         <div>

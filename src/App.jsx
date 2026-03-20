@@ -159,7 +159,7 @@ export default function ArtikaGS() {
     <>
       <style>{getGlobalStyles()}</style>
       <Cursor />
-      <Nav page={page} setPage={setPage} scrollY={scrollY} onSecretAdminTrigger={openAdminMode} />
+      <Nav page={page} setPage={setPage} scrollY={scrollY} site={site} onSecretAdminTrigger={openAdminMode} />
       <PageWrapper k={page}>{renderPage()}</PageWrapper>
       <Footer setPage={setPage} site={site} onSecretAdminTrigger={openAdminMode} />
     </>
