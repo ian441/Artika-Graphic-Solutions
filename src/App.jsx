@@ -29,7 +29,7 @@ import {
   STORE_KEY_SERVICES,
   STORE_KEY_SITE,
 } from "./utils/constants";
-import { loadStore, saveStore } from "./utils/storage";
+import { loadStore } from "./utils/storage";
 import { getGlobalStyles, getAdminStyles } from "./styles/globalStyles";
 
 export default function ArtikaGS() {

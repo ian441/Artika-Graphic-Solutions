@@ -19,9 +19,13 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
   };
 
   const save = async (key, val, setter, successMsg) => {
-    setter(val);
-    await saveStore(key, val);
-    showToast(successMsg || "Saved successfully");
+    try {
+      setter(val);
+      await saveStore(key, val);
+      showToast(successMsg || "Saved successfully");
+    } catch {
+      showToast("Save failed on this device", "error");
+    }
   };
 
   useEffect(() => {
