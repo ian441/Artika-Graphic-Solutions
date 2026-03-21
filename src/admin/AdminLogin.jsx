@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ADMIN_PASS } from "../utils/constants";
+import { loginAdmin } from "../utils/storage";
 
 export const AdminLogin = ({ onLogin }) => {
   const [pw, setPw] = useState("");
   const [err, setErr] = useState(false);
   const [shake, setShake] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -14,13 +15,17 @@ export const AdminLogin = ({ onLogin }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const attempt = () => {
-    if (pw === ADMIN_PASS) {
+  const attempt = async () => {
+    try {
+      setSubmitting(true);
+      await loginAdmin(pw);
       onLogin();
-    } else {
+    } catch {
       setErr(true);
       setShake(true);
       setTimeout(() => setShake(false), 600);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -121,7 +126,7 @@ export const AdminLogin = ({ onLogin }) => {
               setPw(e.target.value);
               setErr(false);
             }}
-            onKeyDown={(e) => e.key === "Enter" && attempt()}
+            onKeyDown={(e) => e.key === "Enter" && !submitting && attempt()}
             placeholder="Enter admin passphrase"
             style={{
               width: "100%",
@@ -157,6 +162,7 @@ export const AdminLogin = ({ onLogin }) => {
           <button
             data-hover
             onClick={attempt}
+            disabled={submitting}
             style={{
               width: "100%",
               fontFamily: "'DM Mono',monospace",
@@ -167,13 +173,14 @@ export const AdminLogin = ({ onLogin }) => {
               padding: isMobile ? "1rem 0" : "0.9rem 0",
               border: "none",
               cursor: isMobile ? "pointer" : "none",
+              opacity: submitting ? 0.7 : 1,
               textTransform: "uppercase",
               transition: "opacity 0.3s",
             }}
             onMouseEnter={(e) => (e.target.style.opacity = "0.82")}
             onMouseLeave={(e) => (e.target.style.opacity = "1")}
           >
-            Enter Studio CMS
+            {submitting ? "Checking..." : "Enter Studio CMS"}
           </button>
         </div>
         <div

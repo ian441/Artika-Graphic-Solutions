@@ -52,5 +52,3 @@ export const STORE_KEY_GALLERY  = "artika_gallery";
 export const STORE_KEY_SERVICES = "artika_services";
 export const STORE_KEY_SITE     = "artika_site";
 
-// Admin password
-export const ADMIN_PASS = "artika2024!";

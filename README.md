@@ -23,7 +23,7 @@ It also includes an embedded admin CMS that lets you edit site content without c
 - Services, About, and Contact sections powered by editable site data
 - Hidden admin entry flow for content management
 - Responsive public and admin interfaces
-- Persistent content storage through a custom `window.storage` API
+- Shared content storage through a Node + PostgreSQL API
 
 ## Tech Stack
 
@@ -56,8 +56,9 @@ Key files:
 - `src/App.jsx`: top-level app flow, page switching, admin mode, data loading
 - `src/pages/*`: public-facing pages
 - `src/admin/*`: admin login and content management panels
-- `src/utils/constants.js`: default seeded content, storage keys, admin password
-- `src/utils/storage.js`: persistence layer using `window.storage`
+- `src/utils/constants.js`: default seeded content used to initialize the database
+- `src/utils/storage.js`: frontend API client for loading and saving CMS data
+- `server/index.js`: Express API for auth and content persistence
 
 ## Getting Started
 
@@ -70,6 +71,32 @@ Key files:
 
 ```bash
 npm install
+```
+
+### Environment variables
+
+Copy `.env.example` to `.env` and update:
+
+```bash
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/artika_graphics
+ADMIN_PASSWORD=change-this-password
+ADMIN_TOKEN_SECRET=change-this-token-secret
+PORT=4000
+CORS_ORIGIN=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:4000/api
+CONTACT_TO_EMAIL=hello@artika-gs.com
+CONTACT_FROM_EMAIL=no-reply@artika-gs.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-username
+SMTP_PASS=your-smtp-password
+```
+
+### Start the API server
+
+```bash
+npm run dev:server
 ```
 
 ### Run the development server
@@ -100,7 +127,7 @@ To open it:
 2. Type `admin` anywhere on the page.
 3. Enter the admin password.
 
-The password is currently defined in `src/utils/constants.js` as `ADMIN_PASS`.
+The password is verified by the backend using `ADMIN_PASSWORD` from your `.env`.
 
 ## Content Management
 
@@ -115,19 +142,24 @@ Default content is seeded from `src/utils/constants.js` when no saved content ex
 
 ## Storage Behavior
 
-This project does **not** use browser `localStorage` directly. It expects a custom global API:
+This project now expects a running API at `VITE_API_BASE_URL`.
 
-```js
-window.storage.get(key)
-window.storage.set(key, value)
-```
+- Public content is loaded from `GET /api/content`
+- Admin login uses `POST /api/auth/login`
+- Admin saves use `PUT /api/content/:key`
+- Contact form submissions use `POST /api/contact`
 
-That means:
+The API stores CMS data in PostgreSQL table `content_entries`.
 
-- In an environment where `window.storage` is available, admin edits persist.
-- In a plain browser-only Vite run, the app still loads, but saved admin changes will silently fail and the app will fall back to the default content.
+## Contact Form Email
 
-If you plan to deploy this as a standard web app, you should replace `src/utils/storage.js` with a browser-backed or server-backed storage implementation.
+The contact form now sends email through your SMTP provider.
+
+- Set `CONTACT_TO_EMAIL` to the inbox where client inquiries should arrive
+- Set `CONTACT_FROM_EMAIL` to the sender address you want on outgoing mail
+- Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, and `SMTP_PASS`
+
+For Gmail, you will usually need an App Password instead of your normal account password.
 
 ## Customization
 
@@ -137,8 +169,6 @@ The fastest way to tailor the studio content is to update `src/utils/constants.j
 - `DEFAULT_GALLERY`
 - `DEFAULT_SERVICES`
 - `DEFAULT_SITE`
-- `ADMIN_PASS`
-
 You may also want to update:
 
 - `index.html` title and favicon
@@ -148,5 +178,5 @@ You may also want to update:
 ## Notes
 
 - The app uses state-based page switching instead of URL routes.
-- The admin password is hardcoded in source, so it should be changed before any real deployment.
+- The API must be running and connected to PostgreSQL for admin saves to persist across devices.
 - The current booking CTA in the home page uses a placeholder Calendly URL.

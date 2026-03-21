@@ -1,10 +1,41 @@
 import React, { useState } from "react";
 import { FadeUp } from "../components/SharedComponents";
+import { submitContactForm } from "../utils/storage";
 
 export const PageContact = ({ site }) => {
   const [form, setForm] = useState({ name: "", email: "", project: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async () => {
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const message = form.message.trim();
+
+    if (!name || !email || !message) {
+      setError("Please fill in your name, email, and message.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError("");
+      await submitContactForm({
+        name,
+        email,
+        project: form.project.trim(),
+        message,
+      });
+      setSent(true);
+      setForm({ name: "", email: "", project: "", message: "" });
+    } catch (err) {
+      setError(err.message || "We couldn't send your inquiry right now.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ background: "#080806", minHeight: "100vh", paddingTop: "5rem" }}>
@@ -193,9 +224,8 @@ export const PageContact = ({ site }) => {
               </div>
               <button
                 data-hover
-                onClick={() => {
-                  if (form.name && form.email) setSent(true);
-                }}
+                onClick={handleSubmit}
+                disabled={submitting}
                 style={{
                   fontFamily: "'DM Mono',monospace",
                   fontSize: "0.68rem",
@@ -206,14 +236,29 @@ export const PageContact = ({ site }) => {
                   width: "100%",
                   border: "none",
                   cursor: "none",
+                  opacity: submitting ? 0.72 : 1,
                   textTransform: "uppercase",
                   transition: "opacity 0.3s",
                 }}
                 onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
                 onMouseLeave={(e) => (e.target.style.opacity = "1")}
               >
-                Send Inquiry
+                {submitting ? "Sending..." : "Send Inquiry"}
               </button>
+              {error && (
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    fontFamily: "'DM Mono',monospace",
+                    fontSize: "0.58rem",
+                    letterSpacing: "0.12em",
+                    color: "#c87e7e",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
             </div>
           )}
         </FadeUp>

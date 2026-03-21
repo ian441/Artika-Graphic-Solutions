@@ -24,18 +24,14 @@ import {
   DEFAULT_GALLERY,
   DEFAULT_SERVICES,
   DEFAULT_SITE,
-  STORE_KEY_PROJECTS,
-  STORE_KEY_GALLERY,
-  STORE_KEY_SERVICES,
-  STORE_KEY_SITE,
 } from "./utils/constants";
-import { loadStore } from "./utils/storage";
+import { clearAdminSession, isAdminAuthenticated, loadContentBundle } from "./utils/storage";
 import { getGlobalStyles, getAdminStyles } from "./styles/globalStyles";
 
 export default function ArtikaGS() {
   const [page, setPageState] = useState("Home");
   const [adminMode, setAdminMode] = useState(false);
-  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminAuth, setAdminAuth] = useState(isAdminAuthenticated());
   const scrollY = useScrollY();
   const openAdminMode = useCallback(() => setAdminMode(true), []);
 
@@ -49,10 +45,16 @@ export default function ArtikaGS() {
   // Load from storage on mount
   useEffect(() => {
     (async () => {
-      setProjects(await loadStore(STORE_KEY_PROJECTS, DEFAULT_PROJECTS));
-      setGallery(await loadStore(STORE_KEY_GALLERY, DEFAULT_GALLERY));
-      setServices(await loadStore(STORE_KEY_SERVICES, DEFAULT_SERVICES));
-      setSite(await loadStore(STORE_KEY_SITE, DEFAULT_SITE));
+      const content = await loadContentBundle({
+        projects: DEFAULT_PROJECTS,
+        gallery: DEFAULT_GALLERY,
+        services: DEFAULT_SERVICES,
+        site: DEFAULT_SITE,
+      });
+      setProjects(content.projects);
+      setGallery(content.gallery);
+      setServices(content.services);
+      setSite(content.site);
       setLoaded(true);
     })();
   }, []);
@@ -66,6 +68,7 @@ export default function ArtikaGS() {
   }, []);
 
   const logout = () => {
+    clearAdminSession();
     setAdminAuth(false);
     setAdminMode(false);
   };

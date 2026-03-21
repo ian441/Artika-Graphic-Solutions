@@ -1,116 +1,90 @@
-const DB_NAME = "artika-content-db";
-const STORE_NAME = "content";
-const DB_VERSION = 1;
-const LOCAL_PREFIX = "artika:";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
+const TOKEN_KEY = "artika_admin_token";
 
-const hasCustomStorage = () =>
-  typeof window !== "undefined" &&
-  window.storage &&
-  typeof window.storage.get === "function" &&
-  typeof window.storage.set === "function";
-
-const hasIndexedDb = () => typeof window !== "undefined" && "indexedDB" in window;
-
-const openDb = () =>
-  new Promise((resolve, reject) => {
-    if (!hasIndexedDb()) {
-      reject(new Error("IndexedDB is not available"));
-      return;
-    }
-
-    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error("Failed to open IndexedDB"));
-  });
-
-const withStore = async (mode, handler) => {
-  const db = await openDb();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, mode);
-    const store = transaction.objectStore(STORE_NAME);
-
-    transaction.oncomplete = () => {
-      db.close();
-    };
-
-    transaction.onerror = () => {
-      db.close();
-      reject(transaction.error || new Error("IndexedDB transaction failed"));
-    };
-
-    handler(store, resolve, reject);
-  });
+const CONTENT_KEY_MAP = {
+  artika_projects: "projects",
+  artika_gallery: "gallery",
+  artika_services: "services",
+  artika_site: "site",
 };
 
-const loadFromIndexedDb = async (key) =>
-  withStore("readonly", (store, resolve, reject) => {
-    const request = store.get(key);
-    request.onsuccess = () => resolve(request.result ?? null);
-    request.onerror = () => reject(request.error || new Error("Failed to read IndexedDB value"));
-  });
-
-const saveToIndexedDb = async (key, value) =>
-  withStore("readwrite", (store, resolve, reject) => {
-    const request = store.put(value, key);
-    request.onsuccess = () => resolve(true);
-    request.onerror = () => reject(request.error || new Error("Failed to write IndexedDB value"));
-  });
-
-const loadFromLocalStorage = (key) => {
-  if (typeof window === "undefined" || !window.localStorage) return null;
-  return window.localStorage.getItem(`${LOCAL_PREFIX}${key}`);
+const getToken = () => {
+  if (typeof window === "undefined" || !window.sessionStorage) return "";
+  return window.sessionStorage.getItem(TOKEN_KEY) || "";
 };
 
-const saveToLocalStorage = (key, value) => {
-  if (typeof window === "undefined" || !window.localStorage) {
-    throw new Error("localStorage is not available");
+const request = async (path, options = {}) => {
+  const headers = new Headers(options.headers || {});
+
+  if (!headers.has("Content-Type") && options.body) {
+    headers.set("Content-Type", "application/json");
   }
 
-  window.localStorage.setItem(`${LOCAL_PREFIX}${key}`, value);
-  return true;
+  const token = getToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json") ? await response.json() : null;
+
+  if (!response.ok) {
+    throw new Error(data?.error || `Request failed with status ${response.status}`);
+  }
+
+  return data;
 };
 
-export const loadStore = async (key, fallback) => {
+export const loadContentBundle = async (fallbacks) => {
   try {
-    if (hasCustomStorage()) {
-      const result = await window.storage.get(key);
-      return result ? JSON.parse(result.value) : fallback;
-    }
-
-    try {
-      const indexedValue = await loadFromIndexedDb(key);
-      if (indexedValue !== null) return JSON.parse(indexedValue);
-    } catch {}
-
-    const localValue = loadFromLocalStorage(key);
-    return localValue ? JSON.parse(localValue) : fallback;
+    const data = await request("/content");
+    return {
+      projects: data.projects ?? fallbacks.projects,
+      gallery: data.gallery ?? fallbacks.gallery,
+      services: data.services ?? fallbacks.services,
+      site: data.site ?? fallbacks.site,
+    };
   } catch {
-    return fallback;
+    return fallbacks;
   }
 };
 
 export const saveStore = async (key, val) => {
-  const serialized = JSON.stringify(val);
-
-  if (hasCustomStorage()) {
-    await window.storage.set(key, serialized);
-    return "custom";
-  }
-
-  try {
-    await saveToIndexedDb(key, serialized);
-    return "indexeddb";
-  } catch {
-    saveToLocalStorage(key, serialized);
-    return "localstorage";
-  }
+  const contentKey = CONTENT_KEY_MAP[key] || key;
+  await request(`/content/${contentKey}`, {
+    method: "PUT",
+    body: JSON.stringify({ value: val }),
+  });
+  return "api";
 };
+
+export const loginAdmin = async (password) => {
+  const data = await request("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
+
+  if (typeof window !== "undefined" && window.sessionStorage) {
+    window.sessionStorage.setItem(TOKEN_KEY, data.token);
+  }
+
+  return data.token;
+};
+
+export const submitContactForm = async (payload) =>
+  request("/contact", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const clearAdminSession = () => {
+  if (typeof window === "undefined" || !window.sessionStorage) return;
+  window.sessionStorage.removeItem(TOKEN_KEY);
+};
+
+export const isAdminAuthenticated = () => Boolean(getToken());
