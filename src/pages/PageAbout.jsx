@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebookF, faInstagram, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
 import { FadeUp } from "../components/SharedComponents";
 import { useInView } from "../hooks/useCustomHooks";
 import profileImage from "../public/images/IMG_0018.JPG__1_-removebg-preview.png";
@@ -35,9 +37,9 @@ export const PageAbout = ({ site }) => {
   const [openFaq, setOpenFaq] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const socialLinks = [
-    { name: "linkedin", href: site?.socialLinkedIn, label: "LinkedIn" },
-    { name: "instagram", href: site?.socialInstagram, label: "Instagram" },
-    { name: "facebook", href: site?.socialFacebook, label: "Facebook" },
+    { href: site?.socialLinkedIn, label: "LinkedIn", icon: faLinkedinIn },
+    { href: site?.socialInstagram, label: "Instagram", icon: faInstagram },
+    { href: site?.socialFacebook, label: "Facebook", icon: faFacebookF },
   ].filter((item) => item.href);
 
   useEffect(() => {
@@ -227,7 +229,7 @@ export const PageAbout = ({ site }) => {
         }}>
           {socialLinks.map((item) => (
             <a
-              key={item.name}
+              key={item.label}
               href={item.href}
               target="_blank"
               rel="noreferrer"
@@ -238,7 +240,7 @@ export const PageAbout = ({ site }) => {
                 display: "inline-flex",
               }}
             >
-              <Icon name={item.name} size={22} color={isMobile ? "#C8A97E" : "#161615"} />
+              <FontAwesomeIcon icon={item.icon} style={{ fontSize: "1.35rem", color: isMobile ? "#C8A97E" : "#161615" }} />
             </a>
           ))}
         </div>

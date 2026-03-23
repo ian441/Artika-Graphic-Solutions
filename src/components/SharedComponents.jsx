@@ -1,9 +1,19 @@
 import { useState, useEffect, useRef } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBehance, faFacebookF, faInstagram, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
 import { useInView } from "../hooks/useCustomHooks";
 
 const SECRET_HOLD_MS = 700;
 const SECRET_TAP_THRESHOLD_MS = 450;
 const SECRET_TAP_COUNT = 4;
+
+const getSocialLinks = (site) =>
+  [
+    { label: "Instagram", href: site?.socialInstagram, icon: faInstagram },
+    { label: "Behance", href: site?.socialBehance, icon: faBehance },
+    { label: "LinkedIn", href: site?.socialLinkedIn, icon: faLinkedinIn },
+    { label: "Facebook", href: site?.socialFacebook, icon: faFacebookF },
+  ].filter((item) => item.href);
 
 const useSecretAdminGesture = (onSecretAdminTrigger) => {
   const pressTimerRef = useRef(null);
@@ -149,11 +159,7 @@ export const Nav = ({ page, setPage, scrollY, site, onSecretAdminTrigger }) => {
   const [isMobile, setIsMobile] = useState(false);
   const { startSecretPress, cancelSecretPress, registerSecretTap } = useSecretAdminGesture(onSecretAdminTrigger);
   const links = ["Home","About", "Services",  "Portfolio", "Gallery"];
-  const socialLinks = [
-    { label: "IG", href: site?.socialInstagram },
-    { label: "BE", href: site?.socialBehance },
-    { label: "LI", href: site?.socialLinkedIn },
-  ].filter((item) => item.href);
+  const socialLinks = getSocialLinks(site);
   
   // Check if screen is mobile
   useEffect(() => {
@@ -508,18 +514,19 @@ export const Nav = ({ page, setPage, scrollY, site, onSecretAdminTrigger }) => {
                   target="_blank"
                   rel="noreferrer"
                   style={{
-                    fontFamily: "'DM Mono',monospace",
-                    fontSize: "0.8rem",
-                    letterSpacing: "0.14em",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "1.25rem",
+                    height: "1.25rem",
                     color: "rgba(255,255,255,0.4)",
                     textDecoration: "none",
-                    textTransform: "uppercase",
                     transition: "color 0.3s",
                   }}
                   onMouseEnter={(e) => (e.target.style.color = "#C8A97E")}
                   onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.4)")}
                 >
-                  {item.label}
+                  <FontAwesomeIcon icon={item.icon} style={{ fontSize: "1rem" }} />
                 </a>
               ))}
             </div>
@@ -588,11 +595,7 @@ export const Marquee = () => {
 // Footer
 export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
   const { startSecretPress, cancelSecretPress, registerSecretTap } = useSecretAdminGesture(onSecretAdminTrigger);
-  const socialLinks = [
-    { label: "Instagram", href: site?.socialInstagram },
-    { label: "Behance", href: site?.socialBehance },
-    { label: "LinkedIn", href: site?.socialLinkedIn },
-  ].filter((item) => item.href);
+  const socialLinks = getSocialLinks(site);
 
   return (
     <footer
@@ -647,18 +650,19 @@ export const Footer = ({ setPage, site, onSecretAdminTrigger }) => {
             target="_blank"
             rel="noreferrer"
             style={{
-              fontFamily: "'DM Mono',monospace",
-              fontSize: "0.58rem",
-              letterSpacing: "0.14em",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "1rem",
+              height: "1rem",
               color: "rgba(255,255,255,0.28)",
               textDecoration: "none",
-              textTransform: "uppercase",
               transition: "color 0.3s",
             }}
             onMouseEnter={(e) => (e.target.style.color = "#C8A97E")}
             onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.28)")}
           >
-            {item.label}
+            <FontAwesomeIcon icon={item.icon} style={{ fontSize: "0.9rem" }} />
           </a>
         ))}
       </div>
