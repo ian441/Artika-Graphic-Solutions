@@ -8,9 +8,39 @@ const CONTENT_KEY_MAP = {
   artika_site: "site",
 };
 
+const clearStoredToken = () => {
+  if (typeof window === "undefined" || !window.sessionStorage) return;
+  window.sessionStorage.removeItem(TOKEN_KEY);
+};
+
+const decodeBase64Url = (value) => {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  return window.atob(padded);
+};
+
+const isTokenValid = (token) => {
+  if (!token || !token.includes(".") || typeof window === "undefined") return false;
+
+  try {
+    const [encodedPayload] = token.split(".");
+    const payload = JSON.parse(decodeBase64Url(encodedPayload));
+    return payload?.role === "admin" && Number(payload?.exp) > Date.now();
+  } catch {
+    return false;
+  }
+};
+
 const getToken = () => {
   if (typeof window === "undefined" || !window.sessionStorage) return "";
-  return window.sessionStorage.getItem(TOKEN_KEY) || "";
+
+  const token = window.sessionStorage.getItem(TOKEN_KEY) || "";
+  if (!isTokenValid(token)) {
+    clearStoredToken();
+    return "";
+  }
+
+  return token;
 };
 
 const request = async (path, options = {}) => {
@@ -34,7 +64,13 @@ const request = async (path, options = {}) => {
   const data = contentType.includes("application/json") ? await response.json() : null;
 
   if (!response.ok) {
-    throw new Error(data?.error || `Request failed with status ${response.status}`);
+    if (response.status === 401) {
+      clearStoredToken();
+    }
+
+    const error = new Error(data?.error || `Request failed with status ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -83,8 +119,7 @@ export const submitContactForm = async (payload) =>
   });
 
 export const clearAdminSession = () => {
-  if (typeof window === "undefined" || !window.sessionStorage) return;
-  window.sessionStorage.removeItem(TOKEN_KEY);
+  clearStoredToken();
 };
 
 export const isAdminAuthenticated = () => Boolean(getToken());

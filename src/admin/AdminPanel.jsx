@@ -23,7 +23,13 @@ export const AdminPanel = ({ projects, setProjects, gallery, setGallery, service
       setter(val);
       await saveStore(key, val);
       showToast(successMsg || "Saved successfully");
-    } catch {
+    } catch (error) {
+      if (error?.status === 401) {
+        showToast("Session expired. Please log in again.", "error");
+        setTimeout(() => onLogout(), 300);
+        return;
+      }
+
       showToast("Save failed on this device", "error");
     }
   };
